@@ -1,5 +1,7 @@
 RecSys2014
 ==========
 
-Edited by Gopi 13.
+
+RecSys 2014 Challenge.
+Go PILOTS!
 
