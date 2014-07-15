@@ -2,8 +2,7 @@
 
 import json
 import sys
-import csv
-
+import re
 
 __author__ = 'gopi'
 
@@ -72,6 +71,10 @@ def print_csv(line_json_features):
     ftr = ''
     for k in uniquekeys:
         ftr = ftr + '\"' + get_key_value(line_json_features, k) + '\"\t'
+
+    ftr.replace("\\r\\n", " ")
+    ftr.replace("\\n", " ")
+    ftr.replace(",", " ")
     csvfile.write(ftr + '\n')
     csvfile.close()
 
@@ -89,7 +92,6 @@ def main(json_input_file):
     f = open(json_input_file, "r")
     next(f)
     for line in f:
-        line.replace('\t', ' ')
         tokens = line.split(',', 4)
 
         uniquekeys.add('twitter_user_id')
@@ -115,5 +117,8 @@ def main(json_input_file):
     print 'Done!'
 
 if __name__ == '__main__':
+
+    if len(sys.argv) != 3:
+        print 'USAGE: python json_to_csv <input JSON file> <output CSV file>'
     csvfilename = sys.argv[2]
     main(sys.argv[1])
