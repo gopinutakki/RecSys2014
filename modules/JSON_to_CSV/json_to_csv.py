@@ -2,7 +2,6 @@
 
 import json
 import sys
-import csv
 
 
 __author__ = 'gopi'
@@ -72,7 +71,7 @@ def print_csv(line_json_features):
     ftr = ''
     for k in uniquekeys:
         ftr = ftr + '\"' + get_key_value(line_json_features, k) + '\"\t'
-    csvfile.write(ftr + '\n')
+    csvfile.write(' '.join(ftr.splitlines()) + '\n')
     csvfile.close()
 
 
