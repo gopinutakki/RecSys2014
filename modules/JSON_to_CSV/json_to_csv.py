@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 
+"""
+This Python module takes the JSON file and converts it to CSV, nothing else.
+'extract_custom_features.py' will extract custom features.
+Do not change this file or add any new features, just create another Python source file if you want to do so.
+"""
+
+
 import json
 import sys
-<<<<<<< HEAD
-import re
-=======
-
->>>>>>> origin/gopi
 
 __author__ = 'gopi'
 
@@ -75,15 +77,7 @@ def print_csv(line_json_features):
     ftr = ''
     for k in uniquekeys:
         ftr = ftr + '\"' + get_key_value(line_json_features, k) + '\"\t'
-<<<<<<< HEAD
-
-    ftr.replace("\\r\\n", " ")
-    ftr.replace("\\n", " ")
-    ftr.replace(",", " ")
-    csvfile.write(ftr + '\n')
-=======
     csvfile.write(' '.join(ftr.splitlines()) + '\n')
->>>>>>> origin/gopi
     csvfile.close()
 
 

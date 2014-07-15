@@ -8,8 +8,10 @@ __author__ = 'gopi'
 
 
 uniquekeys = set()
+user_avg_ratings = dict()
+mov_avg_ratings = dict()
 features = dict()
-user_
+
 csvfilename = ''
 
 
@@ -82,8 +84,41 @@ def generate_csv(all_line_json_features):
         print_csv(line_json_features)
 
 
+def generate_custom_csv(all_line_json_features):
+    csvfile = open('custom_features_1.csv', 'w')
+    csvfile.write('twitter_user-id\timdb_item_id\trating\tscraping_timestamp\tavg_user_rating\t\
+        avg_movie_rating\t~~user~friends_count\t~~user~favourites_count\n')
+    for line_json_features in all_line_json_features:
+        ftr = str(line_json_features['twitter_user_id']) + '\t' + str(line_json_features['imdb_item_id']) + '\t' + str(line_json_features['rating']) + '\t' + str(line_json_features['scraping_timestamp']) + '\t' + str(get_avg_user_rating(line_json_features['twitter_user_id'])) + '\t' + str(get_avg_movie_rating(line_json_features['imdb_item_id'])) + '\t' + str(line_json_features['~~user~friends_count']) + '\t' + str(line_json_features['~~user~favourites_count']) + '\n'
+        csvfile.write(ftr)
+    csvfile.close()
+
+
+def collect_user_ratings(twitter_user_id, rating):
+    if twitter_user_id in user_avg_ratings:
+        user_avg_ratings[twitter_user_id].append(rating)
+    else:
+        user_avg_ratings[twitter_user_id] = [rating]
+
+
+def get_avg_user_rating(t_user_id):
+    return sum(user_avg_ratings[t_user_id])/len(user_avg_ratings[t_user_id])
+
+
+def get_avg_movie_rating(item_id):
+    return sum(mov_avg_ratings[item_id])/len(mov_avg_ratings[item_id])
+
+
+def collect_movie_ratings(imdb_item_id, rating):
+    if imdb_item_id in mov_avg_ratings:
+        mov_avg_ratings[imdb_item_id].append(rating)
+    else:
+        mov_avg_ratings[imdb_item_id] = [rating]
+
+
 def main(json_input_file):
-    global features
+    global features, user_avg_ratings, mov_avg_ratings
+
     all_line_json_features = []
     all_line_json = []
     f = open(json_input_file, "r")
@@ -98,8 +133,11 @@ def main(json_input_file):
         uniquekeys.add('scraping_timestamp')
         features['twitter_user_id'] = tokens[0]
         features['imdb_item_id'] = tokens[1]
-        features['rating'] = tokens[2]
+        features['rating'] = float(tokens[2])
         features['scraping_timestamp'] = tokens[3]
+
+        collect_user_ratings(features['twitter_user_id'], features['rating'])
+        collect_movie_ratings(features['imdb_item_id'], features['rating'])
 
         line_json = json.loads(tokens[4])
         all_line_json.append(line_json)
@@ -111,7 +149,8 @@ def main(json_input_file):
     uk = sorted(uniquekeys, key=None)
     print len(uk)
     print len(all_line_json_features)
-    generate_csv(all_line_json_features)
+    #generate_csv(all_line_json_features)
+    generate_custom_csv(all_line_json_features)
     print 'Done!'
 
 if __name__ == '__main__':
