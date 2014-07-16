@@ -32,6 +32,9 @@ def get_movie_information():
         if i % 100 == 0:
             pickle.dump(movie, open('imdb.p', 'wb'))
 
+        i += 1
+        print i, movie_information[movie]['more']
+
 if __name__ == '__main__':
     for arg in sys.argv[1:]:
         get_movie_id(arg)
