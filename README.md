@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 RecSys2014
 ==========
 <<<<<<< HEAD
@@ -9,3 +10,6 @@ RecSys 2014 Challenge.
 Go PILOTS!
 
 >>>>>>> master
+=======
+
+>>>>>>> FETCH_HEAD
