@@ -23,8 +23,8 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="imdb_multi.py" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/imdb_multi.py">
+      <file leaf-file-name="imdb_multithreaded.py" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/imdb_multithreaded.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.88262373" vertical-offset="695" max-vertical-offset="1564">
               <caret line="86" column="26" selection-start-line="86" selection-start-column="26" selection-end-line="86" selection-end-column="26" />
@@ -152,7 +152,7 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="IMDB_Downloader" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/imdb_multi.py" />
+      <option name="SCRIPT_NAME" value="C:\Users\WKUUSER\Documents\RecSys2014\modules\IMDB_Downloader\imdb_multithreaded.py" />
       <option name="PARAMETERS" value="..\..\dataset\imdb_full_movie_list.txt" />
       <RunnerSettings RunnerId="PythonRunner" />
       <ConfigurationWrapper RunnerId="PythonRunner" />
@@ -370,7 +370,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/imdb_multi.py">
+    <entry file="file://$PROJECT_DIR$/imdb_multithreaded.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.88262373" vertical-offset="695" max-vertical-offset="1564">
           <caret line="86" column="26" selection-start-line="86" selection-start-column="26" selection-end-line="86" selection-end-column="26" />
