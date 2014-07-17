@@ -85,11 +85,12 @@ def generate_csv(all_line_json_features):
 
 
 def generate_custom_csv(all_line_json_features):
-    csvfile = open('custom_features_1.csv', 'w')
-    csvfile.write('twitter_user-id\timdb_item_id\trating\tscraping_timestamp\tavg_user_rating\t\
-        avg_movie_rating\t~~user~friends_count\t~~user~favourites_count\n')
+    csvfile = open(csvfilename, 'w')
+    print 'Writing to file'
+    csvfile.write('twitter_user-id,tweet_id,imdb_item_id,rating,scraping_timestamp,\
+    avg_user_rating,avg_movie_rating,~~user~friends_count,~~user~followers_count,~~user~favourites_count\n')
     for line_json_features in all_line_json_features:
-        ftr = str(line_json_features['twitter_user_id']) + '\t' + str(line_json_features['imdb_item_id']) + '\t' + str(line_json_features['rating']) + '\t' + str(line_json_features['scraping_timestamp']) + '\t' + str(get_avg_user_rating(line_json_features['twitter_user_id'])) + '\t' + str(get_avg_movie_rating(line_json_features['imdb_item_id'])) + '\t' + str(line_json_features['~~user~friends_count']) + '\t' + str(line_json_features['~~user~favourites_count']) + '\n'
+        ftr = str(line_json_features['twitter_user_id']) + ',' + str(line_json_features['~~id_str']) + ',' + str(line_json_features['imdb_item_id']) + ',' + str(line_json_features['rating']) + ',' + str(line_json_features['scraping_timestamp']) + ',' + str(get_avg_user_rating(line_json_features['twitter_user_id'])) + ',' + str(get_avg_movie_rating(line_json_features['imdb_item_id'])) + ',' + str(line_json_features['~~user~friends_count']) + ',' + str(line_json_features['~~user~followers_count']) + ','+ str(line_json_features['~~user~favourites_count']) + '\n'
         csvfile.write(ftr)
     csvfile.close()
 
