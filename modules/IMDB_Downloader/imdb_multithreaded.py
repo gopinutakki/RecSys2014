@@ -63,11 +63,12 @@ def get_movie_id(fname):
         #id = line.split(',')[1] # use this line for the raw dataset.
         mid = line.strip()  # use this for the file with the movie_ids alone.
         movie_ids.add(mid)
+    #print len(movie_ids)
 
 
 def get_movie_information():
     global movie_information
-    pool = ThreadPool(processes=20)
+    pool = ThreadPool(processes=2)
     pool.map(IMDBMovies, movie_ids)
     #m_infos = pool.map(IMDB_Movies, movie_ids)
     #m = [m_info.get_movie_infor() for m_info in m_infos]
@@ -82,6 +83,6 @@ def read_from_pickle():
 
 if __name__ == '__main__':
     for arg in sys.argv[1:]:
-        #get_movie_id(arg)
-        #get_movie_information()
+        get_movie_id(arg)
+        get_movie_information()
         read_from_pickle()
