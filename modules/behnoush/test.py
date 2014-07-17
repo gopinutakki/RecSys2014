@@ -7,7 +7,7 @@ from extract_features import *
 import extract_test as et
 
 
-train = main('training.dat')
+res = extract_features('training.dat','training.csv')
 
 all_line_json_features,X_test,Y_test = et.extract_features_test('test.dat')
 
