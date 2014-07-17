@@ -20,7 +20,7 @@ mov_avg_ratings = dict()
 features = dict()
 #all_line_json_features=[]
 
-csvfilename = 'behnoush_features_1.csv'
+#csvfilename = 'behnoush_features_1.csv'
 #csvfilename = sys.argv[2]
 
 
@@ -60,48 +60,19 @@ def get_all_keys(data, sep="~"):
         sep = '~'
 
 
-def print_header():
-    csvfile = open(csvfilename, 'w')
-    for k in uniquekeys:
-        csvfile.write(k + '\t')
-    csvfile.write('\n')
-    csvfile.close()
 
-
-def get_key_value(line_json_features, k):
-    if line_json_features.get(k) is None:
-        return ''
-    else:
-        try:
-            return str(line_json_features.get(k)).replace("u\'", "").replace("\'", "")
-        except UnicodeEncodeError:
-            return ''
-
-
-def print_csv(line_json_features):
-    csvfile = open(csvfilename, 'a')
-    ftr = ''
-    for k in uniquekeys:
-        ftr = ftr + '\"' + get_key_value(line_json_features, k) + '\"\t'
-    csvfile.write(' '.join(ftr.splitlines()) + '\n')
-    csvfile.close()
-    print "done writing"
-
-
-def generate_csv(all_line_json_features):
-    print_header()
-    for line_json_features in all_line_json_features:
-        print_csv(line_json_features)
-
-
-def generate_custom_csv(all_line_json_features):
-    csvfile = open('behnoush_features_1.csv', 'w')
-    csvfile.write('twitter_user-id , imdb_item_id , rating , scraping_timestamp , avg_user_rating ,\
+def generate_custom_csv(all_line_json_features,the_solution_file):
+    lines = list()
+    lines.append('twitter_user-id , imdb_item_id , rating , scraping_timestamp , avg_user_rating ,\
         avg_movie_rating , ~~user~friends_count , ~~user~followers_count , ~~user~favourites_count\n')
     for line_json_features in all_line_json_features:
-        ftr = str(line_json_features['twitter_user_id']) + ',' + str(line_json_features['imdb_item_id']) + ',' + str(line_json_features['rating']) + ',' + str(line_json_features['scraping_timestamp']) + ',' + str(get_avg_user_rating(line_json_features['twitter_user_id'])) + ',' + str(get_avg_movie_rating(line_json_features['imdb_item_id'])) + ',' + str(line_json_features['~~user~friends_count']) + ',' + str(line_json_features['~~user~followers_count']) + ',' + str(line_json_features['~~user~favourites_count']) + '\n'
-        csvfile.write(ftr)
-    csvfile.close()
+        line = str(line_json_features['twitter_user_id']) + ',' + str(line_json_features['imdb_item_id']) + ',' + str(line_json_features['rating']) + ',' + str(line_json_features['scraping_timestamp']) + ',' + str(get_avg_user_rating(line_json_features['twitter_user_id'])) + ',' + str(get_avg_movie_rating(line_json_features['imdb_item_id'])) + ',' + str(line_json_features['~~user~friends_count']) + ',' + str(line_json_features['~~user~followers_count']) + ',' + str(line_json_features['~~user~favourites_count']) + '\n'
+        lines.append(line)
+    # Prepare the writing...
+    with file(the_solution_file,'w') as outfile:
+        outfile.writelines(lines)
+    outfile.close()
+    return lines
 
 
 def collect_user_ratings(twitter_user_id, rating):
@@ -157,7 +128,7 @@ def test_model(logreg,X_test):
 
 
 
-def main(json_input_file):
+def extract_features(json_input_file,the_solution_file):
     global features, user_avg_ratings, mov_avg_ratings
 
     all_line_json_features =[]
@@ -198,11 +169,10 @@ def main(json_input_file):
     uk = sorted(uniquekeys, key=None)
     print len(uk)
     print len(all_line_json_features)
-    #generate_csv(all_line_json_features)
 #    build_model(all_line_json_features)
-    #generate_custom_csv(all_line_json_features)
+    csv_features = generate_custom_csv(all_line_json_features,the_solution_file)
     print 'Done!'
-    return all_line_json_features
+    return csv_features
 
 #if __name__ == '__main__':
     #csvfilename = sys.argv[2]
