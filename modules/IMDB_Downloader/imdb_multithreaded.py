@@ -3,7 +3,7 @@
 from imdb import IMDb
 from imdbpie import Imdb
 from multiprocessing.pool import ThreadPool
-from multiprocessing import Lock
+import multiprocessing
 import cPickle as pickle
 import sys
 
@@ -11,17 +11,25 @@ import sys
 imdb_statement = IMDb()
 imdb_more = Imdb()
 movie_ids = set()
+saved_movie_ids = set()
 movie_information = dict()
-pickle_lock = Lock()
-
+pickle_lock = multiprocessing.Lock()
+counter = 0
 
 class IMDBMovies(object):
 
     def __init__(self, mid):
-        self.movie_info = self.store_movie_information(mid)
+        self.store_movie_information(mid)
+
 
     def store_movie_information(self, movie):
-        global movie_information
+        global movie_information, saved_movie_ids, counter
+        global pickle_lock
+
+        print movie, len(movie_information),
+
+        if movie in saved_movie_ids:
+            return
 
         m = dict()
         m['mid'] = movie
@@ -37,25 +45,20 @@ class IMDBMovies(object):
 
         m['more'] = imdb_more.find_movie_by_id('tt'+movie)
 
-        movie_information[movie] = m
-
+        pickle_lock.acquire()
         try:
-            pickle_lock.acquire()
-            if len(movie_information) % 1000 == 0:
-                pickle.dump(movie_information, open('imdb.p', 'wb'))
-                print '--> saved'
-
-            print movie, len(movie_information)
+            movie_information[movie] = m
+            if len(movie_information) % 100 == 0:
+                pickle.dump(movie_information, open(str(counter) + '-imdb.p', 'wb'))
+                counter += 1
+                movie_information.clear()
+                print '--> Saved'
         except:
             print "Was unable to acquire the lock"
+            raise
         finally:
             pickle_lock.release()
-
-        return m
-
-    def get_movie_info(self):
-        return self.movie_info
-
+            print ' done.'
 
 def get_movie_id(fname):
     f = open(fname,'r')
@@ -63,26 +66,44 @@ def get_movie_id(fname):
         #id = line.split(',')[1] # use this line for the raw dataset.
         mid = line.strip()  # use this for the file with the movie_ids alone.
         movie_ids.add(mid)
+    if 'item_id' in movie_ids:
+        movie_ids.remove('item_id')
     #print len(movie_ids)
 
 
 def get_movie_information():
     global movie_information
-    pool = ThreadPool(processes=2)
+
+    print 'Fetching IMDB data from counter: ', counter
+    pool = ThreadPool(processes=10)
     pool.map(IMDBMovies, movie_ids)
     #m_infos = pool.map(IMDB_Movies, movie_ids)
     #m = [m_info.get_movie_infor() for m_info in m_infos]
-    pickle.dump(movie_information, open('imdb.p', 'wb'))
+    pickle.dump(movie_information, open(str(counter)+'-imdb.p', 'wb'))
 
 
-def read_from_pickle():
-    m = pickle.load(open('imdb.p', 'rb'))
-    print(len(m))
-    print m['1521848']['update']
-
+def read_movie_ids_from_pickles():
+    global saved_movie_ids, movie_ids, counter
+    print 'Reading the pickles to get all the saved movie IDs'
+    c = 0
+    while True:
+        try:
+            c += 1
+            movies = pickle.load(open(str(c) + '-imdb.p', 'rb'))
+            for k in movies.keys():
+                saved_movie_ids.add(k)
+            print 'Done for pickle: ', c
+        except:
+            print "Done reading saved movie pickles."
+            # Do not raise exception here to facilitate continued execution
+            break
+        finally:
+            counter = c
+    print "Total saved movies: %s, out of %s" % (len(saved_movie_ids), len(movie_ids))
+    movie_ids.difference_update(saved_movie_ids)
 
 if __name__ == '__main__':
     for arg in sys.argv[1:]:
         get_movie_id(arg)
+        read_movie_ids_from_pickles()
         get_movie_information()
-        read_from_pickle()
