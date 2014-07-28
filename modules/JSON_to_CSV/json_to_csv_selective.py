@@ -9,6 +9,7 @@ __author__ = 'gopi'
 
 uniquekeys = set()
 features = dict()
+features_tohave = []
 csvfilename = ''
 
 
@@ -50,9 +51,9 @@ def get_all_keys(data, sep="~"):
 
 def print_header():
     csvfile = open(csvfilename, 'w')
-    for k in uniquekeys:
+    for k in features_tohave:
         csvfile.write(k + ',')
-    csvfile.write('_dummy_')
+    csvfile.write('engagement')
     csvfile.write('\n')
     csvfile.close()
 
@@ -62,7 +63,7 @@ def get_key_value(line_json_features, k):
         return ''
     else:
         try:
-            return str(line_json_features.get(k)).replace("u\'", "").replace("\'", "")
+            return str(line_json_features.get(k)).replace("u\'", "").replace("\'", "").replace(",", " ")
         except UnicodeEncodeError:
             return ''
 
@@ -70,11 +71,11 @@ def get_key_value(line_json_features, k):
 def print_csv(line_json_features):
     csvfile = open(csvfilename, 'a')
     ftr = ''
-    for k in uniquekeys:
+    for k in features_tohave:
         ftr = ftr + '\"' + get_key_value(line_json_features, k) + '\",'
 
-    re.sub(r'\W+', '', ftr)
-    ftr += '_dummy_'
+    eng = get_key_value(line_json_features, '~~retweet_count') + get_key_value(line_json_features, 'favorite_count')
+    ftr += str(eng)
     csvfile.write(' '.join(ftr.splitlines()) + '\n')
     csvfile.close()
 
@@ -86,9 +87,15 @@ def generate_csv(all_line_json_features):
 
 
 def main(json_input_file):
-    global features
+    global features, features_tohave
+
     all_line_json_features = []
     all_line_json = []
+    ft = open('features_to_have.txt', 'rb')
+    for line in ft.readlines():
+        features_tohave.append(line.strip())
+        
+    print len(features_tohave)
     f = open(json_input_file, "r")
     next(f)
     for line in f:
@@ -105,11 +112,13 @@ def main(json_input_file):
 
         line_json = json.loads(tokens[4])
         all_line_json.append(line_json)
+        #print line_json['id_str']
         get_all_keys(line_json, "~")
         all_line_json_features.append(features.copy())
         features.clear()
 
-    uniquekeys.remove("~")
+    #uniquekeys.remove("~")
+
     uk = sorted(uniquekeys, key=None)
     print len(uk)
     print len(all_line_json_features)
