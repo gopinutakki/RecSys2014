@@ -107,3 +107,5 @@ if __name__ == '__main__':
         get_movie_id(arg)
         read_movie_ids_from_pickles()
         get_movie_information()
+
+		

@@ -10,24 +10,42 @@ import weka.core.converters.ArffSaver;
 
 public class AddStatistics {
 
-	static Map<String, Double> count_user_appearance = new HashMap<String, Double>();
-	static Map<String, Double> count_imdb_appearance = new HashMap<String, Double>();
-
-	static Map<String, Double> rating_from_user = new HashMap<String, Double>();
-	static Map<String, Double> rating_for_imdb_movie = new HashMap<String, Double>();
-
 	public static void main(String args[]) throws IOException {
 		System.out.println(args[0]);
+
+		Map<String, Double> newValues = new HashMap<String, Double>();
+
 		Instances training = loadTrainingARFF(args[0]);
-		getAverageUserRating(training);
-		getAverageMovieRating(training);
-		
 		training.insertAttributeAt(new Attribute("avg_user_rating"),
 				training.numAttributes());
 		training.insertAttributeAt(new Attribute("avg_movie_rating"),
 				training.numAttributes());
+		training.insertAttributeAt(new Attribute("movie_retweet_count"),
+				training.numAttributes());
+		training.insertAttributeAt(new Attribute("entities-user_mentions-id_str_count"),
+				training.numAttributes());
+		training.insertAttributeAt(new Attribute("retweeted_status-entities-user_mentions-id_count"),
+				training.numAttributes());
 
-		training = updateInstances(training);
+		newValues = getAverage(training, "twitter_user_id", "movie_rating");
+		training = updateInstances(training, newValues, "twitter_user_id",
+				"avg_user_rating");
+		
+		newValues = getCount(training, "twitter_user_id", "entities-user_mentions-id_str");
+		training = updateInstances(training, newValues, "twitter_user_id",
+				"entities-user_mentions-id_str_count");
+
+		newValues = getCount(training, "twitter_user_id", "retweeted_status-entities-user_mentions-id");
+		training = updateInstances(training, newValues, "twitter_user_id",
+				"retweeted_status-entities-user_mentions-id_count");			
+		
+		newValues = getAverage(training, "imdb_item_id", "movie_rating");
+		training = updateInstances(training, newValues, "imdb_item_id",
+				"avg_movie_rating");
+
+		newValues = getCount(training, "imdb_item_id", "class");
+		training = updateInstances(training, newValues, "imdb_item_id",
+				"movie_retweet_count");
 
 		writeInstances(training);
 		System.out.println("Done!");
@@ -40,34 +58,20 @@ public class AddStatistics {
 		saver.writeBatch();
 	}
 
-	private static Instances updateInstances(Instances training) {
+	private static Instances updateInstances(Instances training,
+			Map<String, Double> newValues, String k1, String k2) {
 
-		String uid, mid;
+		String id;
 		for (int i = 0; i < training.numInstances(); i++) {
 
-			uid = (int) training.instance(i).value(
-					training.attribute("twitter_user_id"))
-					+ "";
-
-			mid = (int) training.instance(i).value(
-					training.attribute("imdb_item_id"))
-					+ "";
-			training.instance(i).setValue(
-					training.attribute("avg_user_rating"),
-					rating_from_user.get(uid));
+			id = (int) training.instance(i).value(training.attribute(k1)) + "";
 			try {
-				training.instance(i).setValue(
-						training.attribute("avg_movie_rating"),
-						rating_for_imdb_movie.get(mid));
-			} catch (NullPointerException npe) {
-				// training.instance(i).setValue(
-				// training.attribute("avg_movie_rating"),
-				// training.instance(i).value(
-				// training.attribute("movie_rating")));
-
+				training.instance(i).setValue(training.attribute(k2),
+						newValues.get(id));
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		}
-
 		return training;
 	}
 
@@ -79,38 +83,10 @@ public class AddStatistics {
 		return data;
 	}
 
-	public static void getAverageMovieRating(Instances training) {
-
-		String mid;
-		int rating;
-
-		for (int i = 0; i < training.numInstances(); i++) {
-
-			mid = (int) training.instance(i).value(
-					training.attribute("imdb_item_id"))
-					+ "";
-						
-			rating = (int) training.instance(i).value(
-					training.attribute("movie_rating"));
-
-			double count = count_imdb_appearance.containsKey(mid) ? count_imdb_appearance
-					.get(mid) : 0;
-			count_imdb_appearance.put(mid, count + 1);
-
-			double r = rating_for_imdb_movie.containsKey(mid) ? rating_for_imdb_movie
-					.get(mid) : 0;
-			rating_for_imdb_movie.put(mid, r + rating);
-		}
-
-		for (String u : count_imdb_appearance.keySet()) {
-			double rt = rating_for_imdb_movie.get(u);
-			double c = count_imdb_appearance.get(u);
-
-			count_imdb_appearance.put(u, rt/c);			
-		}
-	}
-
-	public static void getAverageUserRating(Instances training) {
+	public static Map<String, Double> getAverage(Instances training,
+			String key1, String key2) {
+		Map<String, Double> avgRating = new HashMap<String, Double>();
+		Map<String, Double> appCount = new HashMap<String, Double>();
 
 		String uid;
 		int rating;
@@ -118,31 +94,62 @@ public class AddStatistics {
 		for (int i = 0; i < training.numInstances(); i++) {
 
 			try {
-				uid = (int) training.instance(i).value(
-						training.attribute("twitter_user_id"))
-						+ "";
+				uid = (int) training.instance(i)
+						.value(training.attribute(key1)) + "";
 				rating = (int) training.instance(i).value(
-						training.attribute("movie_rating"));
+						training.attribute(key2));
 			} catch (NumberFormatException nfe) {
 				continue;
 			} catch (ArrayIndexOutOfBoundsException aiobe) {
 				continue;
 			}
 
-			double count = count_user_appearance.containsKey(uid) ? count_user_appearance
-					.get(uid) : 0;
-			count_user_appearance.put(uid, count + 1);
+			double count = appCount.containsKey(uid) ? appCount.get(uid) : 0;
+			appCount.put(uid, count + 1);
 
-			double r = rating_from_user.containsKey(uid) ? count_user_appearance
-					.get(uid) : 0;
-			rating_from_user.put(uid, r + rating);
+			double r = avgRating.containsKey(uid) ? avgRating.get(uid) : 0;
+			avgRating.put(uid, r + rating);
 		}
 
-		for (String u : count_user_appearance.keySet()) {
-			double rt = rating_from_user.get(u);
-			double c = count_user_appearance.get(u);
+		for (String u : appCount.keySet()) {
+			double rt = avgRating.get(u);
+			double c = appCount.get(u);
 
-			count_user_appearance.put(u, rt / c);
+			avgRating.put(u, rt / c);
 		}
+
+		return avgRating;
+	}
+
+	public static Map<String, Double> getCount(Instances training, String key1,
+			String key2) {
+		Map<String, Double> avgRating = new HashMap<String, Double>(); // name says avg but it is only count. I am too lazy.
+		Map<String, Double> appCount = new HashMap<String, Double>();
+		
+		String uid;
+		int rating;
+
+		for (int i = 0; i < training.numInstances(); i++) {
+
+			try {
+				uid = (int) training.instance(i)
+						.value(training.attribute(key1)) + "";
+				rating = (int) training.instance(i).value(
+						training.attribute(key2));
+			} catch (NumberFormatException nfe) {
+				continue;
+			} catch (ArrayIndexOutOfBoundsException aiobe) {
+				continue;
+			}
+
+			double count = appCount.containsKey(uid) ? appCount.get(uid) : 0;
+			appCount.put(uid, count + 1);
+
+			double r = avgRating.containsKey(uid) ? avgRating.get(uid) : 0;
+			avgRating.put(uid, r + rating);
+		}
+
+		return avgRating;
 	}
 }
+
