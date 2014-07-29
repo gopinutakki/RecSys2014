@@ -1,7 +1,17 @@
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Pattern;
+
+import com.sun.xml.internal.bind.v2.schemagen.xmlschema.List;
 
 import weka.core.Attribute;
 import weka.core.Instances;
@@ -10,8 +20,14 @@ import weka.core.converters.ArffSaver;
 
 public class AddStatistics {
 
+	static HashMap<String, HashMap<String, String>> imdb_data = new HashMap<String, HashMap<String, String>>();
+
 	public static void main(String args[]) throws IOException {
 		System.out.println(args[0]);
+		readIMDbData();
+
+		if (true)
+			return;
 
 		Map<String, Double> newValues = new HashMap<String, Double>();
 
@@ -22,23 +38,36 @@ public class AddStatistics {
 				training.numAttributes());
 		training.insertAttributeAt(new Attribute("movie_retweet_count"),
 				training.numAttributes());
-		training.insertAttributeAt(new Attribute("entities-user_mentions-id_str_count"),
+		training.insertAttributeAt(new Attribute(
+				"entities-user_mentions-id_str_count"), training
+				.numAttributes());
+		training.insertAttributeAt(new Attribute(
+				"retweeted_status-entities-user_mentions-id_count"), training
+				.numAttributes());
+
+		training.insertAttributeAt(new Attribute("imdb_genres"),
 				training.numAttributes());
-		training.insertAttributeAt(new Attribute("retweeted_status-entities-user_mentions-id_count"),
+		training.insertAttributeAt(new Attribute("imdb_cast"),
+				training.numAttributes());
+		training.insertAttributeAt(new Attribute("imdb_release_date"),
+				training.numAttributes());
+		training.insertAttributeAt(new Attribute("imdb_director"),
 				training.numAttributes());
 
 		newValues = getAverage(training, "twitter_user_id", "movie_rating");
 		training = updateInstances(training, newValues, "twitter_user_id",
 				"avg_user_rating");
-		
-		newValues = getCount(training, "twitter_user_id", "entities-user_mentions-id_str");
+
+		newValues = getCount(training, "twitter_user_id",
+				"entities-user_mentions-id_str");
 		training = updateInstances(training, newValues, "twitter_user_id",
 				"entities-user_mentions-id_str_count");
 
-		newValues = getCount(training, "twitter_user_id", "retweeted_status-entities-user_mentions-id");
+		newValues = getCount(training, "twitter_user_id",
+				"retweeted_status-entities-user_mentions-id");
 		training = updateInstances(training, newValues, "twitter_user_id",
-				"retweeted_status-entities-user_mentions-id_count");			
-		
+				"retweeted_status-entities-user_mentions-id_count");
+
 		newValues = getAverage(training, "imdb_item_id", "movie_rating");
 		training = updateInstances(training, newValues, "imdb_item_id",
 				"avg_movie_rating");
@@ -83,6 +112,13 @@ public class AddStatistics {
 		return data;
 	}
 
+	public static String getTwitterDate(String date) throws ParseException {
+		final String TWITTER = "EEE MMM dd HH:mm:ss ZZZZZ yyyy";
+		SimpleDateFormat sf = new SimpleDateFormat(TWITTER, Locale.ENGLISH);
+		sf.setLenient(true);
+		return sf.parse(date).getTime() + "";
+	}
+
 	public static Map<String, Double> getAverage(Instances training,
 			String key1, String key2) {
 		Map<String, Double> avgRating = new HashMap<String, Double>();
@@ -123,9 +159,10 @@ public class AddStatistics {
 
 	public static Map<String, Double> getCount(Instances training, String key1,
 			String key2) {
-		Map<String, Double> avgRating = new HashMap<String, Double>(); // name says avg but it is only count. I am too lazy.
+		// name says avg but it is only count. I am too lazy.
+		Map<String, Double> avgRating = new HashMap<String, Double>();
 		Map<String, Double> appCount = new HashMap<String, Double>();
-		
+
 		String uid;
 		int rating;
 
@@ -151,5 +188,32 @@ public class AddStatistics {
 
 		return avgRating;
 	}
-}
 
+	public static void readIMDbData() {
+		// C:\Users\WKUUSER\Documents\RecSys2014\dataset
+		String imdbFile = "C:\\Users\\WKUUSER\\Documents\\RecSys2014\\dataset\\imdb_features.csv";
+		String line = "";
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(imdbFile));
+
+			while ((line = br.readLine()) != null) {
+				String[] tokens = line.split("\t", -1);
+				HashMap<String, String> imdbVals = new HashMap<String, String>();
+
+				imdbVals.put("imdb_genres", tokens[1].trim());
+				imdbVals.put("imdb_cast", tokens[2].trim());
+				imdbVals.put("imdb_release_date", tokens[3].trim());
+				imdbVals.put("imdb_director", tokens[4].trim());
+
+				imdb_data.put(tokens[0], imdbVals);
+			}
+		} catch (FileNotFoundException e) {
+			System.out.println("IMDb data file not found.");
+		} catch (IOException e) {
+
+		} catch (ArrayIndexOutOfBoundsException e) {
+			String[] t = line.split("\t");
+			System.out.println("Error--> " + line + "\n");
+		}
+	}
+}
