@@ -1,20 +1,12 @@
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
-import java.util.TreeSet;
-import java.util.regex.Pattern;
-
-import com.sun.xml.internal.bind.v2.schemagen.xmlschema.List;
 
 import weka.core.Attribute;
 import weka.core.FastVector;
@@ -80,9 +72,9 @@ public class AddStatistics {
 		readIMDbData();
 
 		training = updateInstanceIMDb(training, "imdb_genres");
-		// training = updateInstanceIMDb(training, "imdb_cast");
-		// training = updateInstanceIMDb(training, "imdb_release_date");
-		// training = updateInstanceIMDb(training, "imdb_director");
+		training = updateInstanceIMDb(training, "imdb_cast");
+		training = updateInstanceIMDb(training, "imdb_release_date");
+		training = updateInstanceIMDb(training, "imdb_director");
 
 		writeInstances(training);
 		System.out.println("Done!");
@@ -92,35 +84,19 @@ public class AddStatistics {
 			String imdb_ftr) {
 
 		String id;
-		int count = 0;
 		for (int i = 0; i < training.numInstances(); i++) {
-
-			id = (int) training.instance(i).value(
-					training.attribute("imdb_item_id"))
-					+ "";
+			id = training.instance(i).stringValue(
+					training.attribute("imdb_item_id"));
 			try {
-				if (imdbDataContains(id)) {
+				if (imdb_data.keySet().contains(id)) {
 					training.instance(i).setValue(training.attribute(imdb_ftr),
 							imdb_data.get(id).get(imdb_ftr) + "");
-				} else
-					count++;
+				}
 			} catch (Exception e) {
-				System.out.println(imdb_data.get(id).get(imdb_ftr));
 				e.printStackTrace();
 			}
 		}
-		System.out.println(count);
 		return training;
-	}
-
-	private static boolean imdbDataContains(String id) {
-		System.out.println(id);
-		for (String inter : imdb_data.keySet()) {
-			if (inter.equals(id)) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 	private static void writeInstances(Instances training) throws IOException {
@@ -175,6 +151,7 @@ public class AddStatistics {
 			try {
 				uid = (int) training.instance(i)
 						.value(training.attribute(key1)) + "";
+
 				rating = (int) training.instance(i).value(
 						training.attribute(key2));
 			} catch (NumberFormatException nfe) {
@@ -234,9 +211,8 @@ public class AddStatistics {
 
 	public static void readIMDbData() throws IOException {
 		// C:\Users\WKUUSER\Documents\RecSys2014\dataset
-		// String imdbFile =
-		// "C:\\Users\\WKUUSER\\Documents\\RecSys2014\\dataset\\imdb_features.csv";
-		String imdbFile = "/home/gopi/RecSys2014/dataset/imdb_features.csv";
+		String imdbFile = "C:\\Users\\WKUUSER\\Documents\\RecSys2014\\dataset\\imdb_features.csv";
+		// String imdbFile = "/home/gopi/RecSys2014/dataset/imdb_features.csv";
 		String line = "";
 		BufferedReader br = new BufferedReader(new FileReader(imdbFile));
 
