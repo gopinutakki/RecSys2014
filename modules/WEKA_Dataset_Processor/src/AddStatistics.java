@@ -48,6 +48,12 @@ public class AddStatistics {
 				(FastVector) null), training.numAttributes());
 		training.insertAttributeAt(new Attribute("imdb_director",
 				(FastVector) null), training.numAttributes());
+		training.insertAttributeAt(new Attribute("imdb_languages",
+				(FastVector) null), training.numAttributes());
+		training.insertAttributeAt(new Attribute("imdb_countries",
+				(FastVector) null), training.numAttributes());
+		training.insertAttributeAt(new Attribute("imdb_plot",
+				(FastVector) null), training.numAttributes());
 
 		newValues = getAverage(training, "twitter_user_id", "movie_rating");
 		training = updateInstances(training, newValues, "twitter_user_id",
@@ -72,13 +78,16 @@ public class AddStatistics {
 				"movie_retweet_count");
 
 		training = addUNIXTimestamp(training);
-		
+
 		readIMDbData();
 
 		training = updateInstanceIMDb(training, "imdb_genres");
 		training = updateInstanceIMDb(training, "imdb_cast");
 		training = updateInstanceIMDb(training, "imdb_release_date");
 		training = updateInstanceIMDb(training, "imdb_director");
+		training = updateInstanceIMDb(training, "imdb_languages");
+		training = updateInstanceIMDb(training, "imdb_countries");
+		training = updateInstanceIMDb(training, "imdb_plot");
 
 		writeInstances(training);
 		System.out.println("Done!");
@@ -92,6 +101,7 @@ public class AddStatistics {
 			training.instance(i).setValue(training.attribute("unix_timestamp"),
 					getUNIXTimestamp(ts));
 		}
+		training.deleteAttributeAt(training.attribute("created_at").index());
 		return training;
 	}
 
@@ -240,6 +250,9 @@ public class AddStatistics {
 				imdbVals.put("imdb_cast", tokens[2].trim());
 				imdbVals.put("imdb_release_date", tokens[3].trim());
 				imdbVals.put("imdb_director", tokens[4].trim());
+				imdbVals.put("imdb_languages", tokens[5].trim());
+				imdbVals.put("imdb_countries", tokens[6].trim());
+				imdbVals.put("imdb_plot", tokens[7].trim());
 
 				imdb_data
 						.put(Integer.parseInt(tokens[0].trim()) + "", imdbVals);
