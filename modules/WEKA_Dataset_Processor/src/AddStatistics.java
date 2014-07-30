@@ -7,13 +7,17 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TreeSet;
 import java.util.regex.Pattern;
 
 import com.sun.xml.internal.bind.v2.schemagen.xmlschema.List;
 
 import weka.core.Attribute;
+import weka.core.FastVector;
 import weka.core.Instances;
 import weka.core.converters.ArffLoader;
 import weka.core.converters.ArffSaver;
@@ -24,10 +28,6 @@ public class AddStatistics {
 
 	public static void main(String args[]) throws IOException {
 		System.out.println(args[0]);
-		readIMDbData();
-
-		if (true)
-			return;
 
 		Map<String, Double> newValues = new HashMap<String, Double>();
 
@@ -45,14 +45,15 @@ public class AddStatistics {
 				"retweeted_status-entities-user_mentions-id_count"), training
 				.numAttributes());
 
-		training.insertAttributeAt(new Attribute("imdb_genres"),
+		training.insertAttributeAt(new Attribute("imdb_genres",
+				(FastVector) null), training.numAttributes());
+		training.insertAttributeAt(
+				new Attribute("imdb_cast", (FastVector) null),
 				training.numAttributes());
-		training.insertAttributeAt(new Attribute("imdb_cast"),
-				training.numAttributes());
-		training.insertAttributeAt(new Attribute("imdb_release_date"),
-				training.numAttributes());
-		training.insertAttributeAt(new Attribute("imdb_director"),
-				training.numAttributes());
+		training.insertAttributeAt(new Attribute("imdb_release_date",
+				(FastVector) null), training.numAttributes());
+		training.insertAttributeAt(new Attribute("imdb_director",
+				(FastVector) null), training.numAttributes());
 
 		newValues = getAverage(training, "twitter_user_id", "movie_rating");
 		training = updateInstances(training, newValues, "twitter_user_id",
@@ -76,8 +77,50 @@ public class AddStatistics {
 		training = updateInstances(training, newValues, "imdb_item_id",
 				"movie_retweet_count");
 
+		readIMDbData();
+
+		training = updateInstanceIMDb(training, "imdb_genres");
+		// training = updateInstanceIMDb(training, "imdb_cast");
+		// training = updateInstanceIMDb(training, "imdb_release_date");
+		// training = updateInstanceIMDb(training, "imdb_director");
+
 		writeInstances(training);
 		System.out.println("Done!");
+	}
+
+	private static Instances updateInstanceIMDb(Instances training,
+			String imdb_ftr) {
+
+		String id;
+		int count = 0;
+		for (int i = 0; i < training.numInstances(); i++) {
+
+			id = (int) training.instance(i).value(
+					training.attribute("imdb_item_id"))
+					+ "";
+			try {
+				if (imdbDataContains(id)) {
+					training.instance(i).setValue(training.attribute(imdb_ftr),
+							imdb_data.get(id).get(imdb_ftr) + "");
+				} else
+					count++;
+			} catch (Exception e) {
+				System.out.println(imdb_data.get(id).get(imdb_ftr));
+				e.printStackTrace();
+			}
+		}
+		System.out.println(count);
+		return training;
+	}
+
+	private static boolean imdbDataContains(String id) {
+		System.out.println(id);
+		for (String inter : imdb_data.keySet()) {
+			if (inter.equals(id)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private static void writeInstances(Instances training) throws IOException {
@@ -189,14 +232,16 @@ public class AddStatistics {
 		return avgRating;
 	}
 
-	public static void readIMDbData() {
+	public static void readIMDbData() throws IOException {
 		// C:\Users\WKUUSER\Documents\RecSys2014\dataset
-		String imdbFile = "C:\\Users\\WKUUSER\\Documents\\RecSys2014\\dataset\\imdb_features.csv";
+		// String imdbFile =
+		// "C:\\Users\\WKUUSER\\Documents\\RecSys2014\\dataset\\imdb_features.csv";
+		String imdbFile = "/home/gopi/RecSys2014/dataset/imdb_features.csv";
 		String line = "";
-		try {
-			BufferedReader br = new BufferedReader(new FileReader(imdbFile));
+		BufferedReader br = new BufferedReader(new FileReader(imdbFile));
 
-			while ((line = br.readLine()) != null) {
+		while ((line = br.readLine()) != null) {
+			try {
 				String[] tokens = line.split("\t", -1);
 				HashMap<String, String> imdbVals = new HashMap<String, String>();
 
@@ -205,15 +250,12 @@ public class AddStatistics {
 				imdbVals.put("imdb_release_date", tokens[3].trim());
 				imdbVals.put("imdb_director", tokens[4].trim());
 
-				imdb_data.put(tokens[0], imdbVals);
+				imdb_data
+						.put(Integer.parseInt(tokens[0].trim()) + "", imdbVals);
+			} catch (ArrayIndexOutOfBoundsException e) {
+				System.out.println("Error--> " + line + "\n");
 			}
-		} catch (FileNotFoundException e) {
-			System.out.println("IMDb data file not found.");
-		} catch (IOException e) {
-
-		} catch (ArrayIndexOutOfBoundsException e) {
-			String[] t = line.split("\t");
-			System.out.println("Error--> " + line + "\n");
 		}
+		br.close();
 	}
 }
