@@ -18,7 +18,7 @@ public class AddStatistics {
 
 	static HashMap<String, HashMap<String, String>> imdb_data = new HashMap<String, HashMap<String, String>>();
 
-	public static void main(String args[]) throws IOException {
+	public static void main(String args[]) throws IOException, ParseException {
 		System.out.println(args[0]);
 
 		Map<String, Double> newValues = new HashMap<String, Double>();
@@ -36,6 +36,8 @@ public class AddStatistics {
 		training.insertAttributeAt(new Attribute(
 				"retweeted_status-entities-user_mentions-id_count"), training
 				.numAttributes());
+		training.insertAttributeAt(new Attribute("unix_timestamp",
+				(FastVector) null), training.numAttributes());
 
 		training.insertAttributeAt(new Attribute("imdb_genres",
 				(FastVector) null), training.numAttributes());
@@ -69,6 +71,8 @@ public class AddStatistics {
 		training = updateInstances(training, newValues, "imdb_item_id",
 				"movie_retweet_count");
 
+		training = addUNIXTimestamp(training);
+		
 		readIMDbData();
 
 		training = updateInstanceIMDb(training, "imdb_genres");
@@ -78,6 +82,17 @@ public class AddStatistics {
 
 		writeInstances(training);
 		System.out.println("Done!");
+	}
+
+	private static Instances addUNIXTimestamp(Instances training)
+			throws ParseException {
+		for (int i = 0; i < training.numInstances(); i++) {
+			String ts = training.instance(i).stringValue(
+					training.attribute("created_at"));
+			training.instance(i).setValue(training.attribute("unix_timestamp"),
+					getUNIXTimestamp(ts));
+		}
+		return training;
 	}
 
 	private static Instances updateInstanceIMDb(Instances training,
@@ -131,7 +146,7 @@ public class AddStatistics {
 		return data;
 	}
 
-	public static String getTwitterDate(String date) throws ParseException {
+	public static String getUNIXTimestamp(String date) throws ParseException {
 		final String TWITTER = "EEE MMM dd HH:mm:ss ZZZZZ yyyy";
 		SimpleDateFormat sf = new SimpleDateFormat(TWITTER, Locale.ENGLISH);
 		sf.setLenient(true);
