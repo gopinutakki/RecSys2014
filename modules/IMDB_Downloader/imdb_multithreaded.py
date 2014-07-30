@@ -43,7 +43,7 @@ class IMDBMovies(object):
         imdb_statement.update(imdb_movie_for_update, info=('vote details',))
         m['update'] = imdb_movie_for_update
 
-        m['more'] = imdb_more.find_movie_by_id('tt'+movie)
+        m['more'] = imdb_more.find_movie_by_id('tt'+movie).
 
         pickle_lock.acquire()
         try:
@@ -107,3 +107,5 @@ if __name__ == '__main__':
         get_movie_id(arg)
         read_movie_ids_from_pickles()
         get_movie_information()
+
+		
