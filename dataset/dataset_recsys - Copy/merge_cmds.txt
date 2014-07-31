@@ -1,0 +1,5 @@
+java -cp weka.jar weka.core.Instances merge mahsa3.arff dataset_recsys_Mahsa2_descriptions_cleaned_retweet_100.arff > r_temp.arff
+java -cp weka.jar weka.core.Instances merge r_temp.arff dataset_recsys_Mahsa2_hashTags_cleaned_BoW_retweet_100.arff > retweets.arff
+
+java -cp weka.jar weka.core.Instances merge mahsa3.arff dataset_recsys_Mahsa2_descriptions_cleaned_favorite_100.arff > f_temp.arff
+java -cp weka.jar weka.core.Instances merge f_temp.arff dataset_recsys_Mahsa2_hashTags_cleaned_BoW_favorite_100.arff > favorite.arff
