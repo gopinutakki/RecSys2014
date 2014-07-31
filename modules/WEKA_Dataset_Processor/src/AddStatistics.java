@@ -46,16 +46,18 @@ public class AddStatistics {
 				training.numAttributes());
 		training.insertAttributeAt(new Attribute("imdb_release_date",
 				(FastVector) null), training.numAttributes());
-		training.insertAttributeAt(new Attribute("imdb_release_date_tweet_diff",
-				(FastVector) null), training.numAttributes());
+		training.insertAttributeAt(new Attribute(
+				"imdb_release_date_tweet_diff_minutes", (FastVector) null), training
+				.numAttributes());
 		training.insertAttributeAt(new Attribute("imdb_director",
 				(FastVector) null), training.numAttributes());
 		training.insertAttributeAt(new Attribute("imdb_languages",
 				(FastVector) null), training.numAttributes());
 		training.insertAttributeAt(new Attribute("imdb_countries",
 				(FastVector) null), training.numAttributes());
-		training.insertAttributeAt(new Attribute("imdb_plot",
-				(FastVector) null), training.numAttributes());
+		training.insertAttributeAt(
+				new Attribute("imdb_plot", (FastVector) null),
+				training.numAttributes());
 
 		newValues = getAverage(training, "twitter_user_id", "movie_rating");
 		training = updateInstances(training, newValues, "twitter_user_id",
@@ -86,29 +88,35 @@ public class AddStatistics {
 		training = updateInstanceIMDb(training, "imdb_genres");
 		training = updateInstanceIMDb(training, "imdb_cast");
 		training = updateInstanceIMDb(training, "imdb_release_date");
-		training = updateInstanceTimeDiff(training, "imdb_release_date", "unix_timestamp", "imdb_release_date_tweet_diff");
+		training = updateInstanceTimeDiff(training, "imdb_release_date",
+				"unix_timestamp", "imdb_release_date_tweet_diff_minutes");
 		training = updateInstanceIMDb(training, "imdb_director");
 		training = updateInstanceIMDb(training, "imdb_languages");
 		training = updateInstanceIMDb(training, "imdb_countries");
 		training = updateInstanceIMDb(training, "imdb_plot");
+
+		//training.deleteAttributeAt(training.attribute("created_at").index());
 
 		writeInstances(training);
 		System.out.println("Done!");
 	}
 
 	private static Instances updateInstanceTimeDiff(Instances training,
-			String k1, String k2, String diffKey) throws NumberFormatException, ParseException {
-		
+			String k1, String k2, String diffKey) throws NumberFormatException,
+			ParseException {
+
 		Compare differ = new Compare();
 		for (int i = 0; i < training.numInstances(); i++) {
 			String ts1 = training.instance(i).stringValue(
 					training.attribute(k1));
 			String ts2 = training.instance(i).stringValue(
 					training.attribute(k2));
-			training.instance(i).setValue(training.attribute(diffKey), differ.timeInMinutes(ts1, Long.parseLong(ts2)));
+			if (!ts1.equals("") && !ts1.contains("?") && !ts2.equals("")) {
+				training.instance(i).setValue(training.attribute(diffKey),
+						differ.timeInMinutes(ts1, Long.parseLong(ts2))+"");
+			}
 		}
-		training.deleteAttributeAt(training.attribute("created_at").index());
-		return training;		
+		return training;
 	}
 
 	private static Instances addUNIXTimestamp(Instances training)
@@ -119,7 +127,6 @@ public class AddStatistics {
 			training.instance(i).setValue(training.attribute("unix_timestamp"),
 					getUNIXTimestamp(ts));
 		}
-		training.deleteAttributeAt(training.attribute("created_at").index());
 		return training;
 	}
 

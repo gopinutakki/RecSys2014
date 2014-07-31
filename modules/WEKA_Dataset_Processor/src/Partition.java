@@ -8,15 +8,31 @@ public class Partition {
 
 	/**
 	 * @param args
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public static void main(String[] args) throws IOException {
 		ArffLoader tr = new ArffLoader();
-		tr.setSource(new File(""));
+		tr.setSource(new File(
+				"C:\\Users\\WKUUSER\\Documents\\RecSys2014\\dataset\\dataset_recsys - Copy\\dataset_recsys_Mahsa2.arff"));
 		Instances data = tr.getDataSet();
-		
-		for(int i = 0; i < data.numInstances(); i++){
-			
+		Instances newTweets = new Instances(data);
+		Instances reTweets = new Instances(data);
+
+		for (int i = 0; i < data.numInstances(); i++) {
+			String ts1 = data.instance(i).stringValue(
+					data.attribute("retweeted_status-created_at"));
+
+			if (ts1.equals("") || ts1.contains("?")) {
+				newTweets.delete(i);
+			} else {
+				reTweets.delete(i);
+			}
+
 		}
+
+		// newTweets.deleteWithMissing(data.attribute("retweeted_status-created_at"));
+
+		System.out.println(data.numInstances() + "-->"
+				+ (newTweets.numInstances() + reTweets.numInstances()));
 	}
 }
