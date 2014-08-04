@@ -30,6 +30,11 @@ public class AddStatistics {
 				training.numAttributes());
 		training.insertAttributeAt(new Attribute("movie_retweet_count"),
 				training.numAttributes());
+		training.insertAttributeAt(new Attribute("user_count"),
+				training.numAttributes());
+		training.insertAttributeAt(new Attribute("movie_count"),
+				training.numAttributes());
+
 		training.insertAttributeAt(new Attribute(
 				"entities-user_mentions-id_str_count"), training
 				.numAttributes());
@@ -47,8 +52,8 @@ public class AddStatistics {
 		training.insertAttributeAt(new Attribute("imdb_release_date",
 				(FastVector) null), training.numAttributes());
 		training.insertAttributeAt(new Attribute(
-				"imdb_release_date_tweet_diff_minutes", (FastVector) null), training
-				.numAttributes());
+				"imdb_release_date_tweet_diff_minutes", (FastVector) null),
+				training.numAttributes());
 		training.insertAttributeAt(new Attribute("imdb_director",
 				(FastVector) null), training.numAttributes());
 		training.insertAttributeAt(new Attribute("imdb_languages",
@@ -81,6 +86,15 @@ public class AddStatistics {
 		training = updateInstances(training, newValues, "imdb_item_id",
 				"movie_retweet_count");
 
+		newValues = getCount(training, "imdb_item_id");
+		training = updateInstances(training, newValues, "imdb_item_id",
+				"movie_count");
+		
+		newValues = getCount(training, "twitter_user_id");
+		training = updateInstances(training, newValues, "twitter_user_id",
+				"user_count");
+
+		
 		training = addUNIXTimestamp(training);
 
 		readIMDbData();
@@ -95,7 +109,7 @@ public class AddStatistics {
 		training = updateInstanceIMDb(training, "imdb_countries");
 		training = updateInstanceIMDb(training, "imdb_plot");
 
-		//training.deleteAttributeAt(training.attribute("created_at").index());
+		// training.deleteAttributeAt(training.attribute("created_at").index());
 
 		writeInstances(training);
 		System.out.println("Done!");
@@ -113,7 +127,7 @@ public class AddStatistics {
 					training.attribute(k2));
 			if (!ts1.equals("") && !ts1.contains("?") && !ts2.equals("")) {
 				training.instance(i).setValue(training.attribute(diffKey),
-						differ.timeInMinutes(ts1, Long.parseLong(ts2))+"");
+						differ.timeInMinutes(ts1, Long.parseLong(ts2)) + "");
 			}
 		}
 		return training;
@@ -259,10 +273,38 @@ public class AddStatistics {
 		return avgRating;
 	}
 
+	public static Map<String, Double> getCount(Instances training, String key1) {
+		// name says avg but it is only count. I am too lazy.
+		Map<String, Double> avgRating = new HashMap<String, Double>();
+		Map<String, Double> appCount = new HashMap<String, Double>();
+
+		String uid;
+
+		for (int i = 0; i < training.numInstances(); i++) {
+
+			try {
+				uid = (int) training.instance(i)
+						.value(training.attribute(key1)) + "";
+			} catch (NumberFormatException nfe) {
+				continue;
+			} catch (ArrayIndexOutOfBoundsException aiobe) {
+				continue;
+			}
+
+			double count = appCount.containsKey(uid) ? appCount.get(uid) : 0;
+			appCount.put(uid, count + 1);
+
+			double r = avgRating.containsKey(uid) ? avgRating.get(uid) : 0;
+			avgRating.put(uid, r + 1);
+		}
+
+		return avgRating;
+	}
+
 	public static void readIMDbData() throws IOException {
 		// C:\Users\WKUUSER\Documents\RecSys2014\dataset
-		String imdbFile = "C:\\Users\\WKUUSER\\Documents\\RecSys2014\\dataset\\imdb_features.csv";
-		// String imdbFile = "/home/gopi/RecSys2014/dataset/imdb_features.csv";
+		//String imdbFile = "C:\\Users\\WKUUSER\\Documents\\RecSys2014\\dataset\\imdb_features.csv";
+		String imdbFile = "/home/gopi/RecSys2014/dataset/imdb_features.csv";
 		String line = "";
 		BufferedReader br = new BufferedReader(new FileReader(imdbFile));
 
