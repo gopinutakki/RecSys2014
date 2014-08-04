@@ -303,8 +303,8 @@ public class AddStatistics {
 
 	public static void readIMDbData() throws IOException {
 		// C:\Users\WKUUSER\Documents\RecSys2014\dataset
-		//String imdbFile = "C:\\Users\\WKUUSER\\Documents\\RecSys2014\\dataset\\imdb_features.csv";
-		String imdbFile = "/home/gopi/RecSys2014/dataset/imdb_features.csv";
+		String imdbFile = "C:\\Users\\WKUUSER\\Documents\\RecSys2014\\dataset\\imdb_features.csv";
+		//String imdbFile = "/home/gopi/RecSys2014/dataset/imdb_features.csv";
 		String line = "";
 		BufferedReader br = new BufferedReader(new FileReader(imdbFile));
 
