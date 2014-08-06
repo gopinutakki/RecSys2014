@@ -82,21 +82,21 @@ public class AddStatistics {
 		training = updateInstances(training, newValues, "imdb_item_id",
 				"avg_movie_rating");
 
-		newValues = getCount(training, "imdb_item_id", "class");
+		newValues = getCount(training, "imdb_item_id", "class_retweet_count");
 		training = updateInstances(training, newValues, "imdb_item_id",
 				"movie_retweet_count");
 
 		newValues = getCount(training, "imdb_item_id");
 		training = updateInstances(training, newValues, "imdb_item_id",
 				"movie_count");
-		
+
 		newValues = getCount(training, "twitter_user_id");
 		training = updateInstances(training, newValues, "twitter_user_id",
 				"user_count");
 
-		
 		training = addUNIXTimestamp(training);
 
+		System.out.println("Reading IMDb Data.");
 		readIMDbData();
 
 		training = updateInstanceIMDb(training, "imdb_genres");
@@ -151,7 +151,7 @@ public class AddStatistics {
 		for (int i = 0; i < training.numInstances(); i++) {
 			id = training.instance(i).stringValue(
 					training.attribute("imdb_item_id"));
-			try {
+			try {				
 				if (imdb_data.keySet().contains(id)) {
 					training.instance(i).setValue(training.attribute(imdb_ftr),
 							imdb_data.get(id).get(imdb_ftr) + "");
@@ -253,6 +253,7 @@ public class AddStatistics {
 		for (int i = 0; i < training.numInstances(); i++) {
 
 			try {
+
 				uid = (int) training.instance(i)
 						.value(training.attribute(key1)) + "";
 				rating = (int) training.instance(i).value(
@@ -303,8 +304,8 @@ public class AddStatistics {
 
 	public static void readIMDbData() throws IOException {
 		// C:\Users\WKUUSER\Documents\RecSys2014\dataset
-		String imdbFile = "C:\\Users\\WKUUSER\\Documents\\RecSys2014\\dataset\\imdb_features.csv";
-		//String imdbFile = "/home/gopi/RecSys2014/dataset/imdb_features.csv";
+		String imdbFile = "C:\\Users\\WKUUSER\\Documents\\RecSys2014\\dataset\\imdb_features_testing.csv";
+		// String imdbFile = "/home/gopi/RecSys2014/dataset/imdb_features.csv";
 		String line = "";
 		BufferedReader br = new BufferedReader(new FileReader(imdbFile));
 
