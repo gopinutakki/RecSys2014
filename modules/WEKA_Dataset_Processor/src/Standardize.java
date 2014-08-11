@@ -19,21 +19,30 @@ import weka.filters.Filter;
 
 public class Standardize {
 
+	public static String testingSetFname = "C:\\Users\\WKUUSER\\Documents\\RecSys2014\\dataset\\test_output.arff";
+	public static String testingSetFinalFname = "C:\\Users\\WKUUSER\\Documents\\RecSys2014\\dataset\\test_final.arff";
+	public static String training = "C:\\Users\\WKUUSER\\Documents\\RecSys2014\\dataset\\training_2.arff";
 	public static Instances trainingSet;
 	public static Instances testingSet;
+
+	public static ArrayList<String> trainingAttributes;
+	public static ArrayList<String> testingAttributes;
 
 	/**
 	 * @param args
 	 * @throws Exception
 	 */
-	public static void main(String[] args) throws Exception {
-		// String training =
-		// "C:\\Users\\WKUUSER\\Documents\\RecSys2014\\dataset\\training_2.arff";
-		// String testing =
-		// "C:\\Users\\WKUUSER\\Documents\\RecSys2014\\dataset\\test.arff";
 
-		String training = "/home/gopi/RecSys2014/dataset/training_2.arff";
-		String testing = "/home/gopi/RecSys2014/dataset/test.arff";
+	public static void main(String[] args) throws Exception {
+		writeTestingARFF();
+		//refineTestARFF();
+	}
+
+	public static void writeTestingARFF() throws Exception {
+		String testing = "C:\\Users\\WKUUSER\\Documents\\RecSys2014\\dataset\\test.arff";
+
+		// String training = "/home/gopi/RecSys2014/dataset/training_2.arff";
+		// String testing = "/home/gopi/RecSys2014/dataset/test.arff";
 
 		trainingSet = loadARFF(training);
 		testingSet = loadARFF(testing);
@@ -68,6 +77,11 @@ public class Standardize {
 					.equals("class_retweet_count_cats")) {
 				continue;
 			}
+
+			if (trainingAttributes
+					.contains(testingSetStrWV.attribute(i).name())) {
+				continue;
+			}
 			for (int j = 0; j < testingTemp.numAttributes();) {
 				if (!testingTemp.attribute(j).name()
 						.equals(testingSetStrWV.attribute(i).name())
@@ -92,6 +106,13 @@ public class Standardize {
 						testingSetStrWVTemp.insertAttributeAt(
 								testingTemp.attribute(k),
 								testingSetStrWVTemp.numAttributes());
+
+						for (int ix = 0; ix < testingTemp.numInstances(); ix++) {
+							testingSetStrWVTemp.instance(i).setValue(
+									testingSetStrWVTemp.attribute(testingTemp
+											.attribute(k).name()),
+									testingTemp.attribute(k).value(ix));
+						}
 					}
 				} catch (Exception e) {
 					continue;
@@ -109,6 +130,11 @@ public class Standardize {
 					.equals("class_retweet_count_cats")) {
 				continue;
 			}
+			if (trainingAttributes
+					.contains(testingSetStrWV.attribute(i).name())) {
+				continue;
+			}
+
 			for (int j = 0; j < testingTemp.numAttributes();) {
 				if (!testingTemp.attribute(j).name()
 						.equals(testingSetStrWV.attribute(i).name())
@@ -132,6 +158,12 @@ public class Standardize {
 						testingSetStrWVTemp.insertAttributeAt(
 								testingTemp.attribute(k),
 								testingSetStrWVTemp.numAttributes());
+						for (int ix = 0; ix < testingTemp.numInstances(); ix++) {
+							testingSetStrWVTemp.instance(i).setValue(
+									testingSetStrWVTemp.attribute(testingTemp
+											.attribute(k).name()),
+									testingTemp.attribute(k).value(ix));
+						}
 					}
 				} catch (Exception e) {
 					continue;
@@ -149,6 +181,11 @@ public class Standardize {
 					.equals("class_retweet_count_cats")) {
 				continue;
 			}
+			if (trainingAttributes
+					.contains(testingSetStrWV.attribute(i).name())) {
+				continue;
+			}
+
 			for (int j = 0; j < testingTemp.numAttributes();) {
 				if (!testingTemp.attribute(j).name()
 						.equals(testingSetStrWV.attribute(i).name())
@@ -172,6 +209,12 @@ public class Standardize {
 						testingSetStrWVTemp.insertAttributeAt(
 								testingTemp.attribute(k),
 								testingSetStrWVTemp.numAttributes());
+						for (int ix = 0; ix < testingTemp.numInstances(); ix++) {
+							testingSetStrWVTemp.instance(i).setValue(
+									testingSetStrWVTemp.attribute(testingTemp
+											.attribute(k).name()),
+									testingTemp.attribute(k).value(ix));
+						}
 					}
 				} catch (Exception e) {
 					continue;
@@ -183,18 +226,12 @@ public class Standardize {
 					+ testingSetStrWVTemp.numAttributes());
 		}
 
-		
-		for (int i = 0; i < testingSetStrWVTemp.numAttributes();) {
-			if (trainingAttributes
-					.contains(testingSetStrWVTemp.attribute(i).name())) {
-				testingSetStrWVTemp.deleteAttributeAt(i);
-			} else {
-				i++;
-			}
-		}
-		
 		testingSetStrWVTemp.setClass(testingSetStrWVTemp
 				.attribute("class_retweet_count_cats"));
+
+		ArrayList<String> trList = new ArrayList<String>(trainingAttributes);
+		ArrayList<String> attrList = getAttributeNames(testingSetStrWVTemp);
+
 		writeInstances(testingSetStrWVTemp);
 		System.out.println("Done");
 		printDifference(trainingSet, testingSetStrWVTemp);
@@ -202,14 +239,61 @@ public class Standardize {
 		printDifference(testingSetStrWVTemp, trainingSet);
 	}
 
-	private static void printDifference(Instances tr1,
-			Instances tr2) {
-		
+	private static void refineTestARFF() throws IOException {
+		testingSet = loadARFF(testingSetFname);
+		testingAttributes = getAttributeNames(testingSet);
+		trainingSet = loadARFF(training);
+		trainingAttributes = getAttributeNames(trainingSet);
+		trainingAttributes.removeAll(testingAttributes);
+		for (String s : trainingAttributes) {
+			System.out.println(s + "-->" + trainingSet.attribute(s).type()
+					+ " at " + testingAttributes.size());
+			if (trainingSet.attribute(s).type() == 0) {
+				testingSet.insertAttributeAt(new Attribute(s),
+						testingSet.numAttributes());
+			} else if (trainingSet.attribute(s).type() == 1) {
+				testingSet.insertAttributeAt(new Attribute(s),
+						testingSet.numAttributes());
+			}
+		}
+
+		for (int i = 0; i < testingSet.numInstances(); i++) {
+			if (testingSet.instance(i).value(
+					testingSet.attribute("retweeted_status-id")) > 0) {
+				testingSet.instance(i).setValue(
+						testingSet.attribute("retweeted_flag"), 1);
+			} else
+				testingSet.instance(i).setValue(
+						testingSet.attribute("retweeted_flag"), 0);
+		}
+
+		trainingAttributes = getAttributeNames(trainingSet);
+		for (int i = 0; i < testingSet.numAttributes();) {
+			if (!trainingAttributes.contains(testingSet.attribute(i).name())) {
+				if (testingSet.attribute(i).name()
+						.equals("class_retweet_count_cats")) {
+					i++;
+					continue;
+				}
+				testingSet.deleteAttributeAt(i);
+			} else {
+				i++;
+			}
+		}
+
+		ArffSaver saver = new ArffSaver();
+		saver.setInstances(testingSet);
+		saver.setFile(new File(testingSetFinalFname));
+		saver.writeBatch();
+	}
+
+	private static void printDifference(Instances tr1, Instances tr2) {
+
 		ArrayList<String> ta1 = getAttributeNames(tr1);
 		ArrayList<String> ta2 = getAttributeNames(tr2);
-		
+
 		ta1.removeAll(ta2);
-		for(String t : ta1){
+		for (String t : ta1) {
 			System.out.println("DIFF: " + t);
 		}
 	}
@@ -254,7 +338,7 @@ public class Standardize {
 
 	public static Instances strToWVAndSelect(Instances t, String pName,
 			boolean prefix) throws Exception {
-
+		//
 		// t.insertAttributeAt(testingSet.attribute("class_retweet_count_cats"),
 		// t.numAttributes());
 		t.setClass(t.attribute("class_retweet_count_cats"));
@@ -335,7 +419,7 @@ public class Standardize {
 	private static void writeInstances(Instances training) throws IOException {
 		ArffSaver saver = new ArffSaver();
 		saver.setInstances(training);
-		saver.setFile(new File("test_output.arff"));
+		saver.setFile(new File(testingSetFname));
 		saver.writeBatch();
 	}
 

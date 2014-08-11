@@ -3,14 +3,14 @@
     <!--this file was created by Eclipse Runnable JAR Export Wizard-->
     <!--ANT 1.7 is required                                        -->
     <target name="create_run_jar">
-        <jar destfile="/home/gopi/RecSys2014/modules/WEKA_Dataset_Processor/WDP.jar" filesetmanifest="mergewithoutmain">
+        <jar destfile="C:/Users/WKUUSER/Documents/RecSys2014/modules/WEKA_Dataset_Processor/WDP.jar" filesetmanifest="mergewithoutmain">
             <manifest>
-                <attribute name="Main-Class" value="AddStatistics"/>
+                <attribute name="Main-Class" value="Standardize"/>
                 <attribute name="Class-Path" value="."/>
             </manifest>
-            <fileset dir="/home/gopi/RecSys2014/modules/WEKA_Dataset_Processor/bin"/>
-            <zipfileset excludes="META-INF/*.SF" src="/home/gopi/RecSys2014/modules/WEKA_Dataset_Processor/lib/weka.jar"/>
-            <zipfileset excludes="META-INF/*.SF" src="/home/gopi/RecSys2014/modules/WEKA_Dataset_Processor/lib/joda-time-2.4.jar"/>
+            <fileset dir="C:/Users/WKUUSER/Documents/RecSys2014/modules/WEKA_Dataset_Processor/bin"/>
+            <zipfileset excludes="META-INF/*.SF" src="C:/Users/WKUUSER/Documents/RecSys2014/modules/WEKA_Dataset_Processor/lib/weka.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="C:/Users/WKUUSER/Documents/RecSys2014/modules/WEKA_Dataset_Processor/lib/joda-time-2.4.jar"/>
         </jar>
     </target>
 </project>
