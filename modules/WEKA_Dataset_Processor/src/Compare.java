@@ -25,7 +25,6 @@ public class Compare {
 	}
 
 	public static int timeInMinutes(String d1, Long d2) {
-
 		String date = "1900-1-1";
 		if ((!d1.equals("")) || (!d1.contains("?"))) {
 			System.out.println();
