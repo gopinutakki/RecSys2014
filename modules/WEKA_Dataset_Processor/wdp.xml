@@ -5,7 +5,7 @@
     <target name="create_run_jar">
         <jar destfile="C:/Users/WKUUSER/Documents/RecSys2014/modules/WEKA_Dataset_Processor/WDP.jar" filesetmanifest="mergewithoutmain">
             <manifest>
-                <attribute name="Main-Class" value="Standardize"/>
+                <attribute name="Main-Class" value="GenerateARFF_N"/>
                 <attribute name="Class-Path" value="."/>
             </manifest>
             <fileset dir="C:/Users/WKUUSER/Documents/RecSys2014/modules/WEKA_Dataset_Processor/bin"/>
