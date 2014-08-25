@@ -315,3 +315,4 @@ class User {
 		return median;
 	}
 }
+
