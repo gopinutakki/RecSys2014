@@ -16,6 +16,8 @@ import weka.core.Instances;
 import weka.core.converters.ArffLoader;
 import weka.core.converters.ArffSaver;
 import weka.core.converters.CSVSaver;
+import weka.core.converters.LibSVMSaver;
+import weka.core.converters.SVMLightSaver;
 
 public class GenerateRankerInput {
 
@@ -103,8 +105,10 @@ public class GenerateRankerInput {
 				users.add(new User((Long.parseLong(data.instance(i)
 						.stringValue(data.attribute("twitter_user_id")))), data
 						.instance(i).stringValue(data.attribute("id")), tid
-						.get(i), (Long.parseLong(data.instance(i).stringValue(
-						data.attribute("engagement")).split("_")[0])), r,
+						.get(i),
+						(Long.parseLong(data.instance(i)
+								.stringValue(data.attribute("engagement"))
+								.split("_")[0])), r,
 						tidPredictionMap.get(data.instance(i).stringValue(
 								data.attribute("id"))), engprediction.get(i)));
 			} catch (Exception e) {
@@ -167,6 +171,8 @@ public class GenerateRankerInput {
 					predictions.get(i));
 		}
 
+		Instances data_0 = new Instances(data);
+
 		for (int i = 0; i < data.numInstances();) {
 			if (tidPredictionMap.get(
 					data.instance(i).stringValue(data.attribute("id"))).equals(
@@ -178,9 +184,28 @@ public class GenerateRankerInput {
 			} else
 				i++;
 		}
+
+		for (int i = 0; i < data_0.numInstances();) {
+			if (tidPredictionMap.get(
+					data_0.instance(i).stringValue(data_0.attribute("id")))
+					.equals("00")
+					|| tidPredictionMap.get(
+							data_0.instance(i).stringValue(
+									data_0.attribute("id"))).equals("0")) {
+				i++;
+			} else
+				data_0.delete(i);
+		}
+
 		data.sort(data.attribute("twitter_user_id"));
+		data_0.sort(data.attribute("twitter_user_id"));
+
 		writeARFF(data, "sorted.arff");
 		writeCSV(data, "sorted.csv");
+		//writeSVM(data, "sorted.dat");
+		writeARFF(data_0, "sorted_0.arff");
+		writeCSV(data_0, "sorted_0.csv");
+		//writeSVM(data_0, "sorted_0.dat");
 	}
 
 	private static void printUsers() throws IOException {
@@ -213,6 +238,14 @@ public class GenerateRankerInput {
 
 	public static void writeCSV(Instances t, String fname) throws IOException {
 		CSVSaver saver = new CSVSaver();
+		saver.setInstances(t);
+		saver.setFile(new File(fname));
+		saver.writeBatch();
+		System.out.println("Done writing: " + fname);
+	}
+
+	public static void writeSVM(Instances t, String fname) throws IOException {
+		SVMLightSaver saver = new SVMLightSaver();
 		saver.setInstances(t);
 		saver.setFile(new File(fname));
 		saver.writeBatch();
@@ -315,4 +348,3 @@ class User {
 		return median;
 	}
 }
-
