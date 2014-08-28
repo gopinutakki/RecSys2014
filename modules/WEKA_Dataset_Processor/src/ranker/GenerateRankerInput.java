@@ -327,7 +327,8 @@ class User {
 		this.tidFull = tidFull;
 		this.engagement = engagement;
 		this.rank = rank;
-		this.prediction = getMedian(prediction);
+		//this.prediction = getMedian(prediction);
+		this.prediction = prediction;
 		this.engprediction = (int) Math
 				.round(Double.parseDouble(engprediction));
 	}
