@@ -14,9 +14,9 @@ import weka.core.Instances;
 import weka.core.converters.ArffLoader;
 
 public class GroupedClassifier {
-	
+
 	static final HashMap<String, Classifier> groupedClassifiers = new HashMap<String, Classifier>();
-	
+
 	/**
 	 * @param args
 	 * @throws Exception
@@ -25,47 +25,51 @@ public class GroupedClassifier {
 
 		final Instances training = loadTrainingARFF(args[0]);
 		Instances testing = loadTrainingARFF(args[1]);
-		
+
 		testing.setClassIndex(testing.numAttributes() - 1);
 
 		HashSet<String> trid = getUserIds(training);
 		HashSet<String> trid_temp = getUserIds(training);
 		HashSet<String> teid = getUserIds(testing);
-		
+
+		teid.retainAll(teid);
+		System.out.println("Common: " + trid.size());
 		trid_temp.removeAll(teid);
 		trid.removeAll(trid_temp);
 		
 		// HashSet<String> uid = getUserIds(training);
 		HashSet<String> uid = trid;
-		
+
 		System.out.println("Modeling for all users.");
 		Classifier c = getClassifier(training);
 		groupedClassifiers.put("FULL", c);
 
 		System.out.println("Modeling for grouped users.");
-		ExecutorService exec = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-		try{
+		ExecutorService exec = Executors.newFixedThreadPool(Runtime
+				.getRuntime().availableProcessors());
+		try {
 			for (final String u : uid) {
 				exec.submit(new Runnable() {
-					
+
 					@Override
 					public void run() {
 						System.out.println("User: " + u);
 						Instances uInstances = new Instances(training);
 						uInstances = getUserInstances(uInstances, u);
 						uInstances.setClass(uInstances.attribute("engagement"));
-						try {							
-							groupedClassifiers.put(u, getClassifier(uInstances));
+						try {
+							groupedClassifiers
+									.put(u, getClassifier(uInstances));
 						} catch (Exception e) {
 							e.printStackTrace();
-						}						
+						}
 					}
 				});
 			}
-		}finally{
+		} finally {
 			exec.shutdown();
 		}
-		
+
 		for (String u : uid) {
 			Instances uInstances = new Instances(training);
 			uInstances = getUserInstances(uInstances, u);
@@ -86,7 +90,7 @@ public class GroupedClassifier {
 				c = groupedClassifiers.get(testing.instance(i).stringValue(
 						testing.attribute("twitter_user_id")));
 			}
-			
+
 			if (c.classifyInstance(testing.instance(i)) == testing.instance(i)
 					.classValue()) {
 				count++;
