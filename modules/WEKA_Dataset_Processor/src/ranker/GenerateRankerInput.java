@@ -61,7 +61,6 @@ public class GenerateRankerInput {
 		} else {
 			printUsage();
 		}
-
 	}
 
 	private static void printUsage() {
