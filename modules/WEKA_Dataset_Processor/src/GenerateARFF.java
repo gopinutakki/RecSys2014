@@ -29,11 +29,12 @@ public class GenerateARFF {
 
 	static HashMap<String, HashMap<String, String>> imdb_data = new HashMap<String, HashMap<String, String>>();
 
-	public static void main(String args[]) {
-		// generateARFF();
+	public static void main(String args[]) throws Exception {
+		
+		generateARFF();
 
 		// Switch the parameters for the favorite count datasets.
-		processGeneratedARFF("retweet_count", "favorite_count");
+		//processGeneratedARFF("retweet_count", "favorite_count");
 	}
 
 	private static void processGeneratedARFF(String classAttr, String otherAttr) {
@@ -41,7 +42,9 @@ public class GenerateARFF {
 		// String features =
 		// "/home/gopi/RecSys2014/dataset/features_toStringWordVectors.txt";
 
-		String fname = "C:\\Users\\WKUUSER\\Documents\\RecSys2014\\dataset\\full2.arff";
+		// String fname =
+		// "C:\\Users\\WKUUSER\\Documents\\RecSys2014\\dataset\\full2.arff";
+		String fname = "full2.arff";
 		String features = "C:\\Users\\WKUUSER\\Documents\\RecSys2014\\dataset\\features_toStringWordVectors.txt";
 
 		ArrayList<String> featureList = getFeatureNames(features);
@@ -185,6 +188,8 @@ public class GenerateARFF {
 			String line = "";
 
 			while ((line = br.readLine()) != null) {
+				if (line.startsWith("#"))
+					continue;
 				list.add(line);
 			}
 		} catch (IOException e) {
@@ -243,6 +248,8 @@ public class GenerateARFF {
 				(FastVector) null), training.numAttributes());
 		training.insertAttributeAt(
 				new Attribute("imdb_plot", (FastVector) null),
+				training.numAttributes());
+		training.insertAttributeAt(new Attribute("engagement"),
 				training.numAttributes());
 
 		// ------------------------------------
@@ -322,14 +329,16 @@ public class GenerateARFF {
 		training = updateInstanceIMDb(training, "imdb_release_date");
 		training = updateInstanceTimeDiff(training, "imdb_release_date",
 				"unix_timestamp", "imdb_release_date_tweet_diff_minutes");
-		training = updateInstanceTimeDiff(training, "scraping_timestamp",
-				"unix_timestamp", "scraping_time_tweet_diff_seconds");
+		training = updateInstanceScrapingTimeDiff(training,
+				"scraping_timestamp", "unix_timestamp",
+				"scraping_time_tweet_diff_seconds");
 
 		training = updateInstanceIMDb(training, "imdb_director");
 		training = updateInstanceIMDb(training, "imdb_languages");
 		training = updateInstanceIMDb(training, "imdb_countries");
 		training = updateInstanceIMDb(training, "imdb_plot");
-
+		training = updateEngagement(training, "engagement");
+		
 		// training.deleteAttributeAt(training.attribute("created_at").index());
 
 		// ----------------------------------------
@@ -342,6 +351,24 @@ public class GenerateARFF {
 
 		writeInstances(training);
 		System.out.println("Done!");
+	}
+
+	private static Instances updateEngagement(Instances training, String engagement) throws Exception {
+		for (int i = 0; i < training.numInstances(); i++) {
+			int ts1 = Integer.parseInt(training.instance(i)
+					.stringValue(training.attribute("retweet_count")));
+			int ts2 = Integer.parseInt(training.instance(i).stringValue(
+					training.attribute("favorite_count")));
+			training.instance(i).setValue(training.attribute(engagement), (ts1+ts2));
+		}
+		
+		
+		NumericToNominal nton = new NumericToNominal();
+		nton.setInputFormat(training);
+		nton.setAttributeIndicesArray(new int[] {
+				training.attribute("engagement").index()});
+		training = Filter.useFilter(training, nton);
+		return training;
 	}
 
 	private static Instances updateInstanceTimeDiff(Instances training,
@@ -368,14 +395,12 @@ public class GenerateARFF {
 
 		Compare differ = new Compare();
 		for (int i = 0; i < training.numInstances(); i++) {
-			String ts1 = training.instance(i).stringValue(
-					training.attribute(k1));
+			Long ts1 = (long) training.instance(i)
+					.value(training.attribute(k1));
 			String ts2 = training.instance(i).stringValue(
 					training.attribute(k2));
-			if (!ts1.equals("") && !ts1.contains("?") && !ts2.equals("")) {
-				training.instance(i).setValue(training.attribute(diffKey),
-						differ.timeInMinutes(ts1, Long.parseLong(ts2)));
-			}
+			training.instance(i).setValue(training.attribute(diffKey),
+					ts1 - (Long.parseLong(ts2) / 1000));
 		}
 		return training;
 	}

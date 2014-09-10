@@ -29,28 +29,32 @@ public class GenerateARFF_N {
 
 	static HashMap<String, HashMap<String, String>> imdb_data = new HashMap<String, HashMap<String, String>>();
 	static int N = 10;
+
 	public static void main(String args[]) {
-		if(args.length > 0){
+		if (args.length > 0) {
 			N = Integer.parseInt(args[0]);
 		}
 		// generateARFF();
-		
+
 		// Switch the parameters for the favorite count datasets.
-		if(args[1].equals("r"))
+		if (args[1].equals("r"))
 			processGeneratedARFF("retweet_count", "favorite_count");
-		else if(args[1].equals("f"))
+		else if (args[1].equals("f"))
 			processGeneratedARFF("favorite_count", "retweet_count");
+		else if (args[1].equals("e"))
+			processGeneratedARFF("engagement", "");
 		else
-			System.out.println("Say 'r' or 'f'");
+			System.out.println("Say 'r', 'f' or 'e'");
 	}
 
 	private static void processGeneratedARFF(String classAttr, String otherAttr) {
-		// String fname = "/home/gopi/RecSys2014/dataset/full2.arff";
-		// String features =
-		// "/home/gopi/RecSys2014/dataset/features_toStringWordVectors.txt";
+		String fname = "/home/gopi/RecSys2014/dataset/full2.arff";
+		String features = "/home/gopi/RecSys2014/dataset/features_toStringWordVectors.txt";
 
-		String fname = "C:\\Users\\WKUUSER\\Documents\\RecSys2014\\dataset\\full2.arff";
-		String features = "C:\\Users\\WKUUSER\\Documents\\RecSys2014\\dataset\\features_toStringWordVectors.txt";
+		// String fname =
+		// "C:\\Users\\WKUUSER\\Documents\\RecSys2014\\dataset\\full2.arff";
+		// String features =
+		// "C:\\Users\\WKUUSER\\Documents\\RecSys2014\\dataset\\features_toStringWordVectors.txt";
 
 		ArrayList<String> featureList = getFeatureNames(features);
 		Instances training = null;
@@ -60,11 +64,16 @@ public class GenerateARFF_N {
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
-		training.deleteAttributeAt(training.attribute(otherAttr).index());
+
+		if (!otherAttr.equals("")){
+			training.deleteAttributeAt(training.attribute(otherAttr).index());
+			training.deleteAttributeAt(training.attribute("engagement").index());
+		}
+
 		Instances trainingLarger = new Instances(training);
 		training.setClass(training.attribute(classAttr));
 
-		System.out.println("["+N+"]Done reading the ARFF file.");
+		System.out.println("[" + N + "]Done reading the ARFF file.");
 		Instances temp = null;
 		for (int i = 0; i < featureList.size(); i++) {
 			temp = new Instances(training);
@@ -95,7 +104,7 @@ public class GenerateARFF_N {
 		try {
 			ArffSaver saver = new ArffSaver();
 			saver.setInstances(trainingLarger);
-			saver.setFile(new File("full2_larger_"+N+".arff"));
+			saver.setFile(new File("full2_larger_" + N + ".arff"));
 			saver.writeBatch();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -131,6 +140,7 @@ public class GenerateARFF_N {
 
 		try {
 			AttributeSelection filter = new AttributeSelection();
+			filter.setInputFormat(t);
 			GainRatioAttributeEval eval = new GainRatioAttributeEval();
 			Ranker search = new Ranker();
 			if (t.numAttributes() > N) {
@@ -138,13 +148,11 @@ public class GenerateARFF_N {
 			}
 			filter.setEvaluator(eval);
 			filter.setSearch(search);
-			filter.setInputFormat(t);
 			// generate new data
 			t = Filter.useFilter(t, filter);
-
 		} catch (Exception e) {
 			e.printStackTrace();
-		}		
+		}
 		return t;
 	}
 
@@ -155,6 +163,8 @@ public class GenerateARFF_N {
 			String line = "";
 
 			while ((line = br.readLine()) != null) {
+				if (line.startsWith("#"))
+					continue;
 				list.add(line);
 			}
 		} catch (IOException e) {
