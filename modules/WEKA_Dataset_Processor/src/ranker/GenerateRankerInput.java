@@ -68,7 +68,6 @@ public class GenerateRankerInput {
 				.println("USAGE: java -Xmx4096m -jar GenerateRankerInput.jar beforeranking [test-ARFF-file] [predictions-file]"
 						+ "\nor\n"
 						+ "USAGE: java -Xmx4096m -jar GenerateRankerInput.jar afterranking [test-ARFF-file] [ranker-input-ARFF-file] [ranker-score-file] [predictions-file] [engpredictions-file]");
-
 	}
 
 	public static void afterRanker() throws IOException {
@@ -201,10 +200,10 @@ public class GenerateRankerInput {
 
 		writeARFF(data, "sorted.arff");
 		writeCSV(data, "sorted.csv");
-		//writeSVM(data, "sorted.dat");
+		// writeSVM(data, "sorted.dat");
 		writeARFF(data_0, "sorted_0.arff");
 		writeCSV(data_0, "sorted_0.csv");
-		//writeSVM(data_0, "sorted_0.dat");
+		// writeSVM(data_0, "sorted_0.dat");
 	}
 
 	private static void printUsers() throws IOException {
@@ -326,7 +325,7 @@ class User {
 		this.tidFull = tidFull;
 		this.engagement = engagement;
 		this.rank = rank;
-		//this.prediction = getMedian(prediction);
+		// this.prediction = getMedian(prediction);
 		this.prediction = Integer.parseInt(prediction);
 		this.engprediction = (int) Math
 				.round(Double.parseDouble(engprediction));
