@@ -12,7 +12,7 @@ import json
 def read_movie_from_pickles(dir_path):
     print 'Reading the pickles to get all the saved movie IDs'
     c = 0
-    f = open('imdb_features_testing.csv', 'wb')
+    f = open('imdb_features_evaluation.csv', 'wb')
     while True:
         c += 1
         path = dir_path + str(c) + '-imdb.p'
@@ -69,4 +69,4 @@ def read_movie_from_pickles(dir_path):
     f.close()
 
 if __name__ == '__main__':
-    read_movie_from_pickles('C:\\Users\\WKUUSER\\Documents\\pickles\\testing\\')
+    read_movie_from_pickles('./')

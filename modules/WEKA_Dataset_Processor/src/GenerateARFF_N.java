@@ -109,6 +109,7 @@ public class GenerateARFF_N {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		System.out.println("Done");
 	}
 
 	public static Instances strToWVAndSelect(Instances t, String classAttr,

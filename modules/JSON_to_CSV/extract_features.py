@@ -161,11 +161,12 @@ def main(json_input_file):
     uk = sorted(uniquekeys, key=None)
     print len(uk)
     print len(all_line_json_features)
-    generate_csv(all_line_json_features)
-    #generate_custom_csv(all_line_json_features)
+    #generate_csv(all_line_json_features)
+    generate_custom_csv(all_line_json_features)
     print 'Done!'
 
 if __name__ == '__main__':
-    csvfilename = '/home/gopi/RecSys2014/dataset/test_only_id.txt'
+    csvfilename = '/home/gopi/RecSys2014/dataset/evaluation_only_id.txt'
     #main('/home/gopi/PycharmProjects/RecSys2014/dataset/full.dat')
-    main('/home/gopi/PycharmProjects/RecSys2014/dataset/test.dat')
+    #main('/home/gopi/PycharmProjects/RecSys2014/dataset/test.dat')
+    main('/home/gopi/PycharmProjects/RecSys2014/dataset/all.dat')

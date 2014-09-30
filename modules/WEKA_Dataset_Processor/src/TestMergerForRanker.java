@@ -31,7 +31,8 @@ public class TestMergerForRanker {
 
 		String path = "/home/gopi/RecSys2014/dataset/TestMergerForRanker/";
 
-		String tr = path + "full_60_training.arff";
+		//String tr = path + "full_60_training.arff";
+		String tr = "full2_larger_10_2_train+test+evaluation_FS_Sorted.arff";
 		String tin = path + "full_60_01_testing_UIDs_In_Training.arff";
 		String tnotin = path + "full_60_01_testing_UIDs_Not_In_Training.arff";
 
@@ -40,7 +41,7 @@ public class TestMergerForRanker {
 		String pnotin = path + "predictions_WITHOUT_UIDS.arff";
 
 		writeTrainingSVM(tr);
-		mergeTesting(tin, tnotin, pin, pnotin);
+		//mergeTesting(tin, tnotin, pin, pnotin);
 		System.out.println("DONE!");
 
 	}
@@ -175,7 +176,7 @@ public class TestMergerForRanker {
 		writeARFF(t, "temp.arff");
 		t.deleteAttributeAt(t.attribute("twitter_user_id").index());
 		// t.deleteAttributeAt(t.attribute("engagement").index());
-		t.deleteAttributeAt(t.attribute("id").index());
+		//t.deleteAttributeAt(t.attribute("id").index());
 
 		writeSVM(t, "engagement", "temp.dat");
 		appendTargetUID(target, uids, t, tr.replace(".arff", "_SVM.dat"));

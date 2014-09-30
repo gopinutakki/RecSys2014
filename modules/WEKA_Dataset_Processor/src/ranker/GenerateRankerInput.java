@@ -25,12 +25,12 @@ public class GenerateRankerInput {
 	public static String sortedFileName = "";
 	public static String predictionsFileName = "";
 	public static String rankerOutputFileName = "";
-	public static String engpredictionFileName = "";
+	// public static String engpredictionFileName = "";
 
 	public static ArrayList<Long> tid = new ArrayList<Long>();
 	public static ArrayList<String> predictions = new ArrayList<String>();
 	public static ArrayList<Double> ranks = new ArrayList<Double>();
-	public static ArrayList<String> engprediction = new ArrayList<String>();
+	// public static ArrayList<String> engprediction = new ArrayList<String>();
 
 	public static ArrayList<User> users = new ArrayList<User>();
 	public static HashMap<String, String> tidPredictionMap = new HashMap<String, String>();
@@ -38,10 +38,10 @@ public class GenerateRankerInput {
 
 	/**
 	 * @param args
-	 * @throws IOException
+	 * @throws Exception
 	 */
 
-	public static void main(String args[]) throws IOException {
+	public static void main(String args[]) throws Exception {
 		if (args.length < 2) {
 			printUsage();
 			return;
@@ -56,7 +56,7 @@ public class GenerateRankerInput {
 			sortedFileName = args[2];
 			rankerOutputFileName = args[3];
 			predictionsFileName = args[4];
-			engpredictionFileName = args[5];
+			// engpredictionFileName = args[5];
 			afterRanker();
 		} else {
 			printUsage();
@@ -67,7 +67,7 @@ public class GenerateRankerInput {
 		System.out
 				.println("USAGE: java -Xmx4096m -jar GenerateRankerInput.jar beforeranking [test-ARFF-file] [predictions-file]"
 						+ "\nor\n"
-						+ "USAGE: java -Xmx4096m -jar GenerateRankerInput.jar afterranking [test-ARFF-file] [ranker-input-ARFF-file] [ranker-score-file] [predictions-file] [engpredictions-file]");
+						+ "USAGE: java -Xmx4096m -jar GenerateRankerInput.jar afterranking [test-ARFF-file] [ranker-input-ARFF-file] [ranker-score-file] [predictions-file] [(dont use this)engpredictions-file]");
 	}
 
 	public static void afterRanker() throws IOException {
@@ -77,7 +77,7 @@ public class GenerateRankerInput {
 
 		readRankerScoreOutputFile();
 		readPredictionsFile();
-		readengpredictionsFile();
+		// readengpredictionsFile();
 
 		for (int i = 0; i < data.numInstances(); i++) {
 			tidPredictionMap.put(
@@ -100,6 +100,15 @@ public class GenerateRankerInput {
 						data.attribute("id")));
 			}
 			try {
+				// users.add(new User((Long.parseLong(data.instance(i)
+				// .stringValue(data.attribute("twitter_user_id")))), data
+				// .instance(i).stringValue(data.attribute("id")), tid
+				// .get(i),
+				// (Long.parseLong(data.instance(i)
+				// .stringValue(data.attribute("engagement"))
+				// .split("_")[0])), r,
+				// tidPredictionMap.get(data.instance(i).stringValue(
+				// data.attribute("id"))), engprediction.get(i)));
 				users.add(new User((Long.parseLong(data.instance(i)
 						.stringValue(data.attribute("twitter_user_id")))), data
 						.instance(i).stringValue(data.attribute("id")), tid
@@ -108,24 +117,34 @@ public class GenerateRankerInput {
 								.stringValue(data.attribute("engagement"))
 								.split("_")[0])), r,
 						tidPredictionMap.get(data.instance(i).stringValue(
-								data.attribute("id"))), engprediction.get(i)));
+								data.attribute("id"))), "0"));
 			} catch (Exception e) {
-				System.out.println(((data.instance(i).stringValue(data
-						.attribute("twitter_user_id"))))
-						+ " "
-						+ data.instance(i).stringValue(data.attribute("id"))
-						+ " "
-						+ tid.get(i)
-						+ " "
-						+ ((data.instance(i).stringValue(data
-								.attribute("engagement"))))
-						+ " "
-						+ r
-						+ " "
-						+ tidPredictionMap.get(data.instance(i).stringValue(
-								data.attribute("id")))
-						+ " "
-						+ engprediction.get(i));
+				// System.out.println(((data.instance(i).stringValue(data
+				// .attribute("twitter_user_id"))))
+				// + " "
+				// + data.instance(i).stringValue(data.attribute("id"))
+				// + " "
+				// + tid.get(i)
+				// + " "
+				// + ((data.instance(i).stringValue(data
+				// .attribute("engagement"))))
+				// + " "
+				// + r
+				// + " "
+				// + tidPredictionMap.get(data.instance(i).stringValue(
+				// data.attribute("id")))
+				// + " "
+				// + engprediction.get(i));
+
+//				System.out.println(((data.instance(i).stringValue(data
+//						.attribute("twitter_user_id"))))
+//						+ " "
+//						+ tid.get(i)
+//						+ " "
+//						+ tidPredictionMap.get(data.instance(i).stringValue(
+//								data.attribute("id"))));
+				
+				e.printStackTrace();
 			}
 		}
 
@@ -156,7 +175,7 @@ public class GenerateRankerInput {
 		printUsers();
 	}
 
-	public static void beforeRanker() throws IOException {
+	public static void beforeRanker() throws Exception {
 
 		readTestTweetIDs();
 		readPredictionsFile();
@@ -201,9 +220,84 @@ public class GenerateRankerInput {
 		writeARFF(data, "sorted.arff");
 		writeCSV(data, "sorted.csv");
 		// writeSVM(data, "sorted.dat");
+		writeTrainingSVM("sorted.arff");
 		writeARFF(data_0, "sorted_0.arff");
 		writeCSV(data_0, "sorted_0.csv");
 		// writeSVM(data_0, "sorted_0.dat");
+		writeTrainingSVM("sorted_0.arff");
+		System.out.println("DONE");
+	}
+
+	private static void writeTrainingSVM(String tr) throws Exception {
+		ArrayList<String> uids = new ArrayList<String>();
+		ArrayList<String> target = new ArrayList<String>();
+		Instances t = loadTrainingARFF(tr);
+		t.sort(t.attribute("twitter_user_id"));
+		for (int i = 0; i < t.numInstances(); i++) {
+			uids.add(t.instance(i).stringValue(t.attribute("twitter_user_id")));
+			target.add(t.instance(i).value(t.attribute("engagement")) + "");
+		}
+
+		writeARFF(t, "temp.arff");
+		t.deleteAttributeAt(t.attribute("twitter_user_id").index());
+		// t.deleteAttributeAt(t.attribute("engagement").index());
+		t.deleteAttributeAt(t.attribute("id").index());
+
+		writeSVM(t, "engagement", "temp.dat");
+		appendTargetUID(target, uids, t, tr.replace(".arff", "_SVM.dat"));
+	}
+
+	public static void writeSVM(Instances t, String classAttr, String fname)
+			throws Exception {
+
+		// ReplaceMissingValues rmv = new ReplaceMissingValues();
+		// rmv.setInputFormat(t);
+		// t = Filter.useFilter(t, rmv);
+
+		// SVMLightSaver saver = new SVMLightSaver();
+		// saver.setInstances(t);
+		// saver.setFile(new File(fname));
+		// saver.writeBatch();
+
+		BufferedWriter bw = new BufferedWriter(new FileWriter(fname));
+		String val = "";
+		for (int i = 0; i < t.numInstances(); i++) {
+			String l = t.instance(i).stringValue(t.attribute(classAttr));
+			for (int a = 0; a < t.numAttributes(); a++) {
+				val = t.instance(i).value(t.attribute(a)) + "";
+				// if (val.equals("") || val.equals("?")) {
+				// continue;
+				// }
+
+				if (val.equals("NaN"))
+					continue;
+
+				l += " " + a + ":" + val;
+			}
+			bw.write(l + "\n");
+		}
+		bw.flush();
+		bw.close();
+		System.out.println("Done writing [temp]: " + fname);
+	}
+
+	private static void appendTargetUID(ArrayList<String> target,
+			ArrayList<String> uids, Instances t, String tr) throws IOException {
+		BufferedReader br = new BufferedReader(new FileReader("temp.dat"));
+		BufferedWriter bw = new BufferedWriter(new FileWriter(tr));
+		String line = "";
+		int i = 0;
+		while ((line = br.readLine()) != null) {
+			String tokens[] = line.split(" ", 2);
+			// bw.write(target.get(i) + " qid:" + uids.get(i) + " " +
+			// line.trim() + "\n");
+			bw.write(tokens[0] + " qid:" + uids.get(i) + " " + tokens[1] + "\n");
+			i++;
+		}
+		bw.flush();
+		bw.close();
+		br.close();
+		System.out.println("Done writing: " + tr);
 	}
 
 	private static void printUsers() throws IOException {
@@ -268,33 +362,34 @@ public class GenerateRankerInput {
 		predictions.clear();
 		line = br.readLine();
 		while ((line = br.readLine()) != null) {
-			predictions.add(line.split(",")[2].split(":")[1]);
+			// predictions.add(line.split(",")[2].split(":")[1]);
+			predictions.add(line.trim());
 		}
 		br.close();
 	}
 
-	public static void readengpredictionsFile() throws IOException {
-		BufferedReader br = new BufferedReader(new FileReader(
-				engpredictionFileName));
-		String line = "";
-		engprediction.clear();
-		while ((line = br.readLine()) != null) {
-			engprediction.add(line);
-		}
-		br.close();
-	}
-
-	public static void readengpredictionsFile_() throws IOException {
-		BufferedReader br = new BufferedReader(new FileReader(
-				engpredictionFileName));
-		String line = "";
-		engprediction.clear();
-		line = br.readLine();
-		while ((line = br.readLine()) != null) {
-			engprediction.add((line.split(",")[2].split(":")[1]));
-		}
-		br.close();
-	}
+	// public static void readengpredictionsFile() throws IOException {
+	// BufferedReader br = new BufferedReader(new FileReader(
+	// engpredictionFileName));
+	// String line = "";
+	// engprediction.clear();
+	// while ((line = br.readLine()) != null) {
+	// engprediction.add(line);
+	// }
+	// br.close();
+	// }
+	//
+	// public static void readengpredictionsFile_() throws IOException {
+	// BufferedReader br = new BufferedReader(new FileReader(
+	// engpredictionFileName));
+	// String line = "";
+	// engprediction.clear();
+	// line = br.readLine();
+	// while ((line = br.readLine()) != null) {
+	// engprediction.add((line.split(",")[2].split(":")[1]));
+	// }
+	// br.close();
+	// }
 
 	public static void readRankerScoreOutputFile() throws IOException {
 		BufferedReader br = new BufferedReader(new FileReader(

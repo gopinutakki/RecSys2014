@@ -63,8 +63,8 @@ class IMDBMovies(object):
 def get_movie_id(fname):
     f = open(fname,'r')
     for line in f.readlines():
-        #id = line.split(',')[1] # use this line for the raw dataset.
-        mid = line.strip()  # use this for the file with the movie_ids alone.
+        mid = line.split(',')[1] # use this line for the raw dataset.
+        #mid = line.strip()  # use this for the file with the movie_ids alone.
         movie_ids.add(mid)
     if 'item_id' in movie_ids:
         movie_ids.remove('item_id')
@@ -103,6 +103,7 @@ def read_movie_ids_from_pickles():
     movie_ids.difference_update(saved_movie_ids)
 
 if __name__ == '__main__':
+    #/home/gopi/Downloads/evaluation_empty.dat
     for arg in sys.argv[1:]:
         get_movie_id(arg)
         read_movie_ids_from_pickles()

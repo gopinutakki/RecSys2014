@@ -30,11 +30,11 @@ public class GenerateARFF {
 	static HashMap<String, HashMap<String, String>> imdb_data = new HashMap<String, HashMap<String, String>>();
 
 	public static void main(String args[]) throws Exception {
-		
+
 		generateARFF();
 
 		// Switch the parameters for the favorite count datasets.
-		//processGeneratedARFF("retweet_count", "favorite_count");
+		// processGeneratedARFF("retweet_count", "favorite_count");
 	}
 
 	private static void processGeneratedARFF(String classAttr, String otherAttr) {
@@ -199,8 +199,8 @@ public class GenerateARFF {
 
 	public static void generateARFF() throws Exception {
 
-		// String fname = "/home/gopi/RecSys2014/dataset/full1a.arff";
-		String fname = "C:\\Users\\WKUUSER\\Documents\\RecSys2014\\dataset\\full1a.arff";
+		String fname = "/home/gopi/RecSys2014/dataset/all.arff";
+		//String fname = "C:\\Users\\WKUUSER\\Documents\\RecSys2014\\dataset\\full1a.arff";
 		Map<String, Double> newValues = new HashMap<String, Double>();
 
 		Instances training = loadTrainingARFF(fname);
@@ -338,7 +338,7 @@ public class GenerateARFF {
 		training = updateInstanceIMDb(training, "imdb_countries");
 		training = updateInstanceIMDb(training, "imdb_plot");
 		training = updateEngagement(training, "engagement");
-		
+
 		// training.deleteAttributeAt(training.attribute("created_at").index());
 
 		// ----------------------------------------
@@ -353,20 +353,30 @@ public class GenerateARFF {
 		System.out.println("Done!");
 	}
 
-	private static Instances updateEngagement(Instances training, String engagement) throws Exception {
+	private static Instances updateEngagement(Instances training,
+			String engagement) throws Exception {
 		for (int i = 0; i < training.numInstances(); i++) {
-			int ts1 = Integer.parseInt(training.instance(i)
-					.stringValue(training.attribute("retweet_count")));
-			int ts2 = Integer.parseInt(training.instance(i).stringValue(
-					training.attribute("favorite_count")));
-			training.instance(i).setValue(training.attribute(engagement), (ts1+ts2));
+			
+			String ts1s = training.instance(i).stringValue(
+					training.attribute("retweet_count"));
+			int ts1 = 0;
+			if(!ts1s.equals("?"))
+				ts1 = Integer.parseInt(ts1s);
+			
+			String ts2s = training.instance(i).stringValue(
+					training.attribute("favorite_count"));
+			int ts2 = 0;
+			if(!ts2s.equals("?"))
+				ts2 = Integer.parseInt(ts2s);
+			
+			training.instance(i).setValue(training.attribute(engagement),
+					(ts1 + ts2));
 		}
-		
-		
+
 		NumericToNominal nton = new NumericToNominal();
 		nton.setInputFormat(training);
-		nton.setAttributeIndicesArray(new int[] {
-				training.attribute("engagement").index()});
+		nton.setAttributeIndicesArray(new int[] { training.attribute(
+				"engagement").index() });
 		training = Filter.useFilter(training, nton);
 		return training;
 	}
@@ -575,15 +585,15 @@ public class GenerateARFF {
 
 	public static void readIMDbData() throws IOException {
 		// C:\Users\WKUUSER\Documents\RecSys2014\dataset
-		String imdbFile = "C:\\Users\\WKUUSER\\Documents\\RecSys2014\\dataset\\imdb_features_training.csv";
 		// String imdbFile =
-		// "/home/gopi/RecSys2014/dataset/imdb_features_training.csv";
+		// "C:\\Users\\WKUUSER\\Documents\\RecSys2014\\dataset\\imdb_features_training.csv";
+		String imdbFile = "/home/gopi/RecSys2014/dataset/imdb_features_all.csv";
 		String line = "";
 		BufferedReader br = new BufferedReader(new FileReader(imdbFile));
 
 		while ((line = br.readLine()) != null) {
 			try {
-				String[] tokens = line.split("\t", -1);
+				String[] tokens = line.split(",", -1);
 				HashMap<String, String> imdbVals = new HashMap<String, String>();
 
 				imdbVals.put("imdb_genres", tokens[1].trim());
