@@ -21,10 +21,11 @@ public class Compare {
 	 * @throws ParseException
 	 */
 	public static void main(String[] args) {
-		System.out.println(timeInMinutes("2111-1-1", Long.parseLong("1370563385000")));
+		System.out.println(timeInMinutes("2111-1-1",
+				Long.parseLong("1370563385000")));
 	}
 
-	public static int timeInMinutes(String d1, Long d2) {
+	public static long timeInMinutes(String d1, Long d2) {
 		String date = "1900-1-1";
 		if ((!d1.equals("")) || (!d1.contains("?"))) {
 			System.out.println();
@@ -48,7 +49,12 @@ public class Compare {
 
 		DateTime dt1 = new DateTime(date1);
 		DateTime dt2 = new DateTime(d2);
-		
-		return Minutes.minutesBetween(dt1, dt2).getMinutes();
+		int mins = 100000;
+		try {
+			mins = Minutes.minutesBetween(dt1, dt2).getMinutes();
+		} catch (Exception e) {
+			return 100000;
+		}
+		return mins;
 	}
 }

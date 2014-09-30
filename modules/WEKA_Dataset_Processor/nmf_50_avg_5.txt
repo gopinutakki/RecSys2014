@@ -1,0 +1,12 @@
+RecSys Challenge 2014 Evaluator
+-------------------------------
+
+Evaluated 5717 users with predictions
+Validated against 5717 users in test set
+
+----------------------
+
+nDCG@10: 0.744238975179917
+
+
+

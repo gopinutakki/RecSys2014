@@ -30,8 +30,7 @@ public class CSVtoARFF {
 	public static Instances loadTrainingARFF(String fname) throws IOException{
 		ArffLoader tr = new ArffLoader();
 		tr.setSource(new File(fname));
-		Instances data = tr.getDataSet();
-		
+		Instances data = tr.getDataSet();		
 		return data;
 	}
 }

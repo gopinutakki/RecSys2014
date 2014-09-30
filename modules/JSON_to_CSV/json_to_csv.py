@@ -95,7 +95,6 @@ def main(json_input_file):
     next(f)
     for line in f:
         tokens = line.split(',', 4)
-
         uniquekeys.add('twitter_user_id')
         uniquekeys.add('imdb_item_id')
         uniquekeys.add('rating')

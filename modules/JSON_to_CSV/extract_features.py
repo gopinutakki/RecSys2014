@@ -79,8 +79,9 @@ def print_csv(line_json_features):
     csvfile = open(csvfilename, 'a')
     ftr = ''
     for k in uniquekeys:
-        ftr = ftr + '\"' + get_key_value(line_json_features, k) + '\"\t'
-    ftr += 'dummy'
+        if k == '~~id_str':
+            ftr = ftr + '\"' + get_key_value(line_json_features, k) + '\"\t'
+    #ftr += 'dummy'
     csvfile.write(' '.join(ftr.splitlines()) + '\n')
     csvfile.close()
 
@@ -160,10 +161,12 @@ def main(json_input_file):
     uk = sorted(uniquekeys, key=None)
     print len(uk)
     print len(all_line_json_features)
-    generate_csv(all_line_json_features)
-    #generate_custom_csv(all_line_json_features)
+    #generate_csv(all_line_json_features)
+    generate_custom_csv(all_line_json_features)
     print 'Done!'
 
 if __name__ == '__main__':
-    csvfilename = 'training_out_all.csv'
-    main('/home/gopi/PycharmProjects/RecSys2014/dataset/full.dat')
+    csvfilename = '/home/gopi/RecSys2014/dataset/evaluation_only_id.txt'
+    #main('/home/gopi/PycharmProjects/RecSys2014/dataset/full.dat')
+    #main('/home/gopi/PycharmProjects/RecSys2014/dataset/test.dat')
+    main('/home/gopi/PycharmProjects/RecSys2014/dataset/all.dat')
